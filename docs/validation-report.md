@@ -1,44 +1,46 @@
-# v0.1.0 implementation validation
+# v0.1.1 implementation validation
 
-Validated on 2026-10-29 with Python 3.12.14, SQLite 3.53.1 (FTS5 available),
-MCP SDK 1.30.0, and Pydantic 2.14.1.
+Validated on 2026-10-29 with Python 3.12.14/Linux, SQLite 3.53.1 (FTS5 available), MCP SDK 1.30.0,
+and Pydantic 2.14.1. This report distinguishes locally executed checks from configured remote jobs.
 
 | Check | Result |
 |---|---|
 | Editable installation with development dependencies | Passed |
-| `python -m pytest -q` | 52 passed, 0 failed, 0 skipped |
-| Real MCP subprocess/client integration | Passed; all nine tools called, valid and invalid inputs exercised |
-| `ruff check .` | Passed |
-| `python -m examples.scenarios` | Passed; all four synthetic scenarios asserted |
-| `python -m build` | Passed; sdist and wheel generated |
-| Independent wheel installation and functional smoke test | Passed; source checksum, evidence, revision reassessment, review, export, restart persistence |
-| `python -m pip check` | Passed |
-| Six Mermaid source files | Parsed with Mermaid 11 and a DOM implementation; sanitization enabled |
-| Local diagram visual rendering | Blocked: Chromium policy rejects the CLI's local file navigation |
-| GitHub rendering and Actions status | Not verified; API access denied by the network proxy |
+| `python -m pytest -q` | 81 passed, 0 failed, 0 skipped |
+| Real MCP subprocess/client integration | Passed; all ten tools called, valid/invalid inputs exercised |
+| `ruff check .` and `git diff --check` | Passed |
+| Four assertion-checked synthetic scenarios | Passed |
+| sdist and wheel builds | Passed |
+| Wheel installed into a fresh venv outside the checkout | Passed; evidence workflow, backup, restore, persistence |
+| Dependency consistency (`pip check`) | Passed |
+| CI and release workflow YAML syntax | Parsed successfully |
+| Python 3.11–3.13 on Linux/macOS/Windows | Configured in CI; remote results not confirmed locally |
+| GitHub Actions and Release status | API access blocked at the proxy; do not infer success from a tag push |
 | Coverage | Not measured |
-| Python 3.11 / 3.13 execution | Configured in CI, not locally executed |
-| ChatGPT connectivity | Not verified; no remote bridge provided |
+| ChatGPT connectivity | Not verified; local stdio MCP only |
 
-The suite exercises persistence, revisions, source checksums, audit preservation, search,
-relationship changes, reviews, exports, deterministic comparisons, contexts, unit conversions,
-tolerance boundaries, traversal and symlinks, FIFO/oversized file rejection, SQL injection strings,
-malformed inputs/UUIDs, oversized records, duplicate source copies, corrupt/newer databases,
-CLI exit codes, and real MCP errors and successful calls.
+The suite covers original wording, revisions, provenance, source checksums, relationship histories,
+review attribution, exports, SQLite persistence, search, numerical contexts and unit conversions,
+tolerance boundaries, malformed inputs, corrupt/newer databases, SQL injection strings, filesystem
+traversal/symlinks, oversized/FIFO source files, collision-safe copying, CLI exit codes, and MCP.
 
-Release-hardening regressions cover evidence reassessment after claim revision (including legacy
-links), comparison input preservation after revision, optional reviewer attribution, boolean
-measurement rejection through Python and MCP, blank evidence fields, conversion overflow, and
-source identifier collisions without deleting previously stored files.
+New tests cover complete source-backed backup round trips, metadata-only portable backup/restore,
+changed/missing/unsafe stored files, source verification separation, refusal to overwrite stores or
+archives, byte tampering, forged manifest membership, archive traversal, duplicate members, size
+limits, corrupted database snapshots, database/source hash disagreement, safe restore failures,
+comparison explanations, finite JSON output at extreme numerical ranges, optional context
+checklists, readable CLI output, convenience arguments, and the platform-specific file-ingestion
+contract. Windows CI intentionally runs metadata/CLI/MCP tests instead of POSIX-only file-ingestion
+and filesystem-primitive tests. It does not claim equivalent local-file copying support.
 
-The restricted command sandbox initially timed out during MCP initialization and blocked network
-connections. The supported escalated execution mode allowed the same full suite to pass without
-changing tests or disabling verification. GitHub API requests remain blocked at proxy CONNECT
-(HTTP 403), even in that mode. The required `api.github.com` domain was added to the environment
-configuration draft; saving a draft does not apply the policy or grant repository permissions.
+Source directory mutation, restore, and simultaneous restores require a trusted single-user
+workspace. The backup format is bounded and checksummed, not encrypted or authenticated. These
+checks validate software behavior; they do not establish scientific reliability or comprehensive
+security. Earlier Mermaid syntax parsing succeeded for six diagrams; no diagrams changed in
+v0.1.1. Visual rendering remains unverified due to Chromium's local-file policy.
 
-No independent source verification, semantic reasoning, remote transport, or authenticated
-multi-user workflows are implemented. These results validate the development workflow, not
-scientific content or comprehensive security. The README roadmap contains planned capabilities
-only. Git publication and GitHub Release creation are separate operations; neither follows from
-local validation. Publication outcomes are reported separately.
+The command sandbox restricts MCP subprocess communication and network access. The supported
+escalated command mode was used for the successful suite, installation, and builds, retaining proxy,
+TLS, and package verification. `api.github.com` remains denied at proxy CONNECT (HTTP 403). A saved
+network draft is not an applied policy. Publication outcomes are reported separately; the new
+GitHub release workflow is gated on its own CI results and uses least-privilege job permissions.

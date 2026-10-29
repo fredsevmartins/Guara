@@ -1,7 +1,7 @@
 """Official MCP SDK stdio adapter. No sockets or remote fetching."""
 
 import sqlite3
-from typing import Any
+from typing import Any, Literal
 
 from mcp.server.fastmcp import FastMCP
 from mcp.server.fastmcp.exceptions import ToolError
@@ -55,6 +55,7 @@ def create_server(workspace="."):
         value: StrictFloat | str | None = None,
         unit: str | None = None,
         context: dict[str, Any] | None = None,
+        context_template: Literal["engineering", "experiment", "study"] | None = None,
         provenance: dict[str, Any] | None = None,
         actor: str | None = None,
     ) -> dict:
@@ -67,6 +68,7 @@ def create_server(workspace="."):
             value=value,
             unit=unit,
             context=context or {},
+            context_template=context_template,
             provenance=provenance or {},
             actor=actor,
         )
@@ -139,6 +141,11 @@ def create_server(workspace="."):
         return invoke(
             "review_claim", claim_id=claim_id, decision=decision, reason=reason, actor=actor
         )
+
+    @server.tool()
+    def verify_sources(source_id: str | None = None) -> dict:
+        """Check stored file hashes; byte integrity is not scientific source verification."""
+        return invoke("verify_sources", source_id=source_id)
 
     @server.tool()
     def export_evidence(actor: str | None = None) -> dict:

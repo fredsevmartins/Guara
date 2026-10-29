@@ -28,6 +28,7 @@ class Claim(Input):
     value: FiniteFloat | str | None = None
     unit: str | None = Field(default=None, max_length=100)
     context: dict[str, Any] = Field(default_factory=dict)
+    context_template: Literal["engineering", "experiment", "study"] | None = None
     provenance: dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("value", mode="before")

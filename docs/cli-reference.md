@@ -19,3 +19,30 @@ and exit code 1. Syntax/argparse failures use exit code 2. `init` and `mcp` do n
 
 See [quickstart](quickstart.md) for executable argument shapes. Shell redirect `export` output to
 an appropriate private destination; export contains sensitive evidence text and attribution.
+
+
+## Convenience arguments and readable output
+
+JSON remains the default output, preserving automation compatibility. Put `--format text` before
+the command for human-readable claims and integrity reports. Other structured reports use indented
+JSON in text mode. `--json` remains available; supplying the same field via JSON and a convenience
+argument is an error rather than an implicit override.
+
+```sh
+opentruth claim add "SYNTHETIC statement" --subject beam --predicate length --value 1 --unit m
+opentruth --format text claim inspect CLAIM_UUID
+opentruth source add "SYNTHETIC report" --file report.txt --type TECHNICAL_DOCUMENT
+opentruth source verify
+opentruth source verify SOURCE_UUID
+opentruth conflicts check CLAIM_UUID
+opentruth history CLAIM_UUID
+opentruth backup snapshot.zip
+opentruth restore snapshot.zip --data-dir restored-evidence
+opentruth context templates study
+```
+
+Claim flags also include `--context`, `--provenance` (JSON objects), and `--context-template`.
+`--value` parses JSON numbers/quoted strings; other text is kept as a qualitative value. Booleans
+are rejected as measurements. Restore and context commands have their own positional syntax and
+do not accept `--json`. Backup accepts either an archive positional argument or JSON.
+`source verify` exits 1 with its report if any stored file is missing, altered, or unsafe.

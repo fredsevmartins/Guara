@@ -1,0 +1,36 @@
+name: Publish GitHub release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+jobs:
+  checks:
+    uses: ./.github/workflows/ci.yml
+  release:
+    needs: checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install build
+      - name: Check version consistency
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          python - <<'PY'
+          import os, pathlib, tomllib
+          project = tomllib.loads(pathlib.Path('pyproject.toml').read_text())
+          assert os.environ['RELEASE_TAG'] == 'v' + project['project']['version']
+          assert pathlib.Path('docs/releases/' + os.environ['RELEASE_TAG'] + '.md').is_file()
+          PY
+      - run: python -m build
+      - name: Publish tested artifacts and release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: gh release create "$RELEASE_TAG" dist/* --verify-tag --title "OpenTruth $RELEASE_TAG" --notes-file "docs/releases/$RELEASE_TAG.md"

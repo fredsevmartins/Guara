@@ -23,3 +23,11 @@ New comparison records include `inputs`: the exact wording, subject, predicate, 
 and context used for both claims. These snapshots keep historical results interpretable after
 claim revisions. Legacy comparison records lack these snapshots and must not be treated as
 evidence of which historical values were compared.
+
+
+New records expose a `comparison` explanation containing normalized values, comparison unit,
+conversion factor (second claim into first claim's unit), absolute difference, applied absolute
+and relative tolerances, allowed difference, and the exact rule. If an intermediate difference or
+threshold cannot be represented as a finite float, it is marked OUT_OF_RANGE instead of emitting
+invalid JSON. Non-numerical/incomparable outcomes do not imply a numerical check was performed.
+Optional context checklists are described in [context templates](context-templates.md).

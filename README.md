@@ -27,7 +27,7 @@ its evidence changed, without treating a saved answer as an established fact.
 - Explicit SUPPORTS, CONTRADICTS, RELATED, and INCONCLUSIVE relationships.
 - Keyword/phrase search, subject/property/review filters, evidence inspection, JSON export.
 - Conservative numeric comparison with context, units, and configurable tolerances.
-- Shared Python API, JSON CLI, and nine tools through the official MCP SDK (stdio).
+- Shared Python API, JSON CLI, and ten tools through the official MCP SDK (stdio).
 
 ## Architecture
 
@@ -158,3 +158,24 @@ does not independently validate that evidence.
 ## License
 
 OpenTruth is available under the [MIT license](LICENSE).
+
+## Backup and integrity (v0.1.1)
+
+```sh
+opentruth claim add "SYNTHETIC: beam length is 1 m." --subject beam --predicate length --value 1 --unit m
+opentruth --format text claim list
+opentruth source verify
+opentruth backup snapshot.zip
+opentruth restore snapshot.zip --data-dir restored-evidence
+opentruth context templates engineering
+```
+
+JSON output and existing `--json` inputs remain supported. Backup includes a consistent SQLite
+snapshot and registered source files; restore validates bytes and never overwrites an existing
+data directory. Source integrity checks do not validate scientific content. Optional context
+checklists warn about missing fields and prevent unsupported comparisons using those templates.
+
+See [backup and integrity](docs/backup-and-integrity.md), [context templates](docs/context-templates.md),
+and [platform support and releases](docs/platforms-and-releases.md). Windows supports metadata
+workflows; secure local source ingestion remains POSIX-only. The release workflow creates GitHub
+releases with package artifacts only after its configured checks pass.

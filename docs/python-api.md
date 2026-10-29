@@ -20,7 +20,7 @@ app.close()
 | Method | Required arguments | Optional arguments |
 |---|---|---|
 | register_source | title | actor, source_type, authors, doi, url, publication_date, file_path |
-| add_claim | original_statement | actor, subject, predicate, value, unit, context, provenance |
+| add_claim | original_statement | actor, subject, predicate, value, unit, context, context_template, provenance |
 | revise_claim | claim_id, reason | actor, changed Claim model fields |
 | link_evidence | claim_id, source_id, relationship, source_location, excerpt, actor | — |
 | revise_evidence | link_id, reason | relationship, source_location, excerpt, actor |
@@ -47,3 +47,14 @@ six persisted entity/history tables. IDs and source file references are retained
 history arrays follows insertion order. Export adds its own audit event. Files require a separate
 backup; no import is implemented. Entities, activities, and actor attribution are inspired by W3C
 PROV terminology, without claiming validated PROV standards compliance.
+
+
+| Additional method | Required arguments | Optional arguments |
+|---|---|---|
+| verify_sources | — | source_id |
+| backup | archive_path | — |
+
+`from opentruth.backup import restore_backup` exposes `restore_backup(workspace, archive_path,
+data_dir=".opentruth")`. The target data directory must be absent. See the
+[backup format and limits](backup-and-integrity.md). JSON export remains metadata-only; archive
+backup additionally includes registered source bytes.

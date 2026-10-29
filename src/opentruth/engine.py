@@ -13,6 +13,7 @@ from uuid import UUID, uuid4
 from pydantic import TypeAdapter
 
 from .conflicts import compare, validate_tolerances
+from .contexts import context_warnings
 from .database import connect
 from .models import Claim, Link, Review, Source
 
@@ -112,13 +113,15 @@ class OpenTruth:
                     "INSERT INTO claim_search VALUES (?,?)", (data["id"], original_statement)
                 )
             self._event("CLAIM_CREATED", data["id"], actor, data)
-        return data
+        return dict(
+            data, context_warnings=context_warnings(data["context"], data["context_template"])
+        )
 
     def revise_claim(self, claim_id, reason, actor=None, **changes):
         if not reason.strip():
             raise ValueError("Revision reason required")
         old = self._get("claims", claim_id)
-        candidate = {k: old[k] for k in Claim.model_fields}
+        candidate = {k: old[k] for k in Claim.model_fields if k in old}
         candidate.update(changes)
         data = Claim(**candidate).model_dump()
         data.update(
@@ -139,7 +142,9 @@ class OpenTruth:
                     (data["original_statement"], claim_id),
                 )
             self._event("CLAIM_REVISED", claim_id, actor, {"reason": reason, "revision": data})
-        return data
+        return dict(
+            data, context_warnings=context_warnings(data["context"], data["context_template"])
+        )
 
     @contextmanager
     def _source_file(self, relative):
@@ -300,6 +305,7 @@ class OpenTruth:
 
     def inspect_claim(self, claim_id):
         data = self._get("claims", claim_id)
+        data["context_warnings"] = context_warnings(data["context"], data.get("context_template"))
         links = [
             json.loads(r[0])
             for r in self.db.execute(
@@ -422,3 +428,15 @@ class OpenTruth:
                     for r in self.db.execute(f"SELECT payload FROM {table} ORDER BY rowid")
                 ]
         return result
+
+    def verify_sources(self, source_id=None):
+        """Compare stored bytes with recorded hashes; never verify scientific content."""
+        from .integrity import verify_sources
+
+        return verify_sources(self, source_id)
+
+    def backup(self, archive_path):
+        """Create a complete, consistent backup without overwriting an existing archive."""
+        from .backup import create_backup
+
+        return create_backup(self, archive_path)

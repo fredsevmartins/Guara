@@ -48,7 +48,7 @@ def test_real_mcp_session(tmp_path):
         ):
             await session.initialize()
             listed = await session.list_tools()
-            assert len(listed.tools) == 9
+            assert len(listed.tools) == 10
 
             async def call(name, args):
                 result = await session.call_tool(name, args)
@@ -105,6 +105,9 @@ def test_real_mcp_session(tmp_path):
             conflict = await session.call_tool("check_conflicts", {"claim_id": a["id"]})
             assert not conflict.isError
             exported = await call("export_evidence", {})
+            integrity = await call("verify_sources", {})
+            assert integrity["ok"] is True
+            assert integrity["scientific_verification"] == "NOT_EVALUATED"
             assert len(exported["claims"]) == 1
             invalid = await session.call_tool("inspect_claim", {"claim_id": "invalid"})
             assert invalid.isError
