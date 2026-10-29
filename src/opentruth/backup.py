@@ -12,6 +12,7 @@ from uuid import UUID
 
 from .database import SCHEMA_VERSION
 from .integrity import digest_stream, open_source, source_reference
+from .locking import WorkspaceLock
 
 MAX_DATABASE = 256 * 1024 * 1024
 MAX_TOTAL = 1024 * 1024 * 1024
@@ -103,7 +104,14 @@ def create_backup(engine, archive_path):
     }
 
 
-def restore_backup(workspace, archive_path, data_dir=".opentruth"):
+def restore_backup(workspace, archive_path, data_dir=".opentruth", lock_timeout=5):
+    workspace = Path(workspace).resolve(strict=True)
+    workspace_path(workspace, data_dir)
+    with WorkspaceLock(workspace, data_dir, lock_timeout):
+        return _restore_backup(workspace, archive_path, data_dir)
+
+
+def _restore_backup(workspace, archive_path, data_dir):
     """Verify all bytes and SQLite before restoring into a new data directory."""
     workspace = Path(workspace).resolve(strict=True)
     archive_path = workspace_path(workspace, archive_path)
@@ -127,7 +135,7 @@ def restore_backup(workspace, archive_path, data_dir=".opentruth"):
                 raise TypeError("Backup manifest must be an object")
             if (
                 manifest.get("backup_version") != 1
-                or manifest.get("schema_version") != SCHEMA_VERSION
+                or manifest.get("schema_version") not in range(1, SCHEMA_VERSION + 1)
             ):
                 raise ValueError("Unsupported backup or database version")
             members = manifest["members"]
@@ -163,7 +171,7 @@ def restore_backup(workspace, archive_path, data_dir=".opentruth"):
                     raise ValueError("Backup checksum mismatch")
         db = sqlite3.connect(root / "evidence.sqlite3")
         try:
-            if db.execute("PRAGMA user_version").fetchone()[0] != SCHEMA_VERSION:
+            if db.execute("PRAGMA user_version").fetchone()[0] != manifest["schema_version"]:
                 raise ValueError("Database version differs from manifest")
             if db.execute("PRAGMA integrity_check").fetchall() != [("ok",)]:
                 raise ValueError("Database integrity check failed")

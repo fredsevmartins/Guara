@@ -58,3 +58,11 @@ PROV terminology, without claiming validated PROV standards compliance.
 data_dir=".opentruth")`. The target data directory must be absent. See the
 [backup format and limits](backup-and-integrity.md). JSON export remains metadata-only; archive
 backup additionally includes registered source bytes.
+
+
+Since v0.1.2, `search_claims` and `check_conflicts` accept `limit=100, offset=0` (limit 1–1000).
+Search accepts `include_history=False`; `inspect_claim` accepts `include_history=True` by default.
+`get_claim_history` accepts `limit=None, offset=0` in Python (MCP defaults to 100).
+`OpenTruth` and `restore_backup` accept `lock_timeout=5` (0–60 seconds). Catch
+`opentruth.locking.WorkspaceBusy` to handle another client's active operation. See
+[scaling/concurrency](scaling-and-concurrency.md) for compatibility and snapshot limitations.

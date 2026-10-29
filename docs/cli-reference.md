@@ -46,3 +46,8 @@ Claim flags also include `--context`, `--provenance` (JSON objects), and `--cont
 are rejected as measurements. Restore and context commands have their own positional syntax and
 do not accept `--json`. Backup accepts either an archive positional argument or JSON.
 `source verify` exits 1 with its report if any stored file is missing, altered, or unsafe.
+
+
+Listing/conflict/history commands accept `--limit N --offset N`; claim listing also accepts
+`--include-history`. Default search/conflict limit is 100 and the maximum is 1000. Legacy `--json`
+can supply the same fields. Busy stores return a structured `WORKSPACE_BUSY` error and exit 1.

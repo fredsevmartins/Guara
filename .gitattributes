@@ -1,0 +1,2 @@
+# Migration snapshots are fingerprinted byte-for-byte, including on Windows.
+tests/fixtures/** -text

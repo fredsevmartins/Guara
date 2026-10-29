@@ -6,7 +6,9 @@ import sqlite3
 import sys
 import zipfile
 
+from .database import SCHEMA_VERSION
 from .engine import OpenTruth
+from .locking import WorkspaceBusy
 
 COMMANDS = {
     ("source", "add"): "register_source",
@@ -48,6 +50,9 @@ def readable(result):
 def main():
     parser = argparse.ArgumentParser(description="OpenTruth — Make AI Knowledge Verifiable.")
     parser.add_argument("--workspace", default=".", help="Allowed workspace and data root")
+    parser.add_argument(
+        "--lock-timeout", type=float, default=5, help="Operation lock wait, 0–60 seconds"
+    )
     parser.add_argument("--format", choices=["json", "text"], default="json")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("init", help="Initialize local SQLite storage")
@@ -80,6 +85,11 @@ def main():
         }.get(method)
         if positional:
             command.add_argument(positional, nargs="?")
+        if method in {"search_claims", "check_conflicts", "get_claim_history"}:
+            command.add_argument("--limit", type=int)
+            command.add_argument("--offset", type=int)
+        if method in {"search_claims", "inspect_claim"}:
+            command.add_argument("--include-history", action="store_true", default=None)
         if method == "add_claim":
             for field in (
                 "subject",
@@ -99,21 +109,23 @@ def main():
         if args.command == "mcp":
             from .mcp_server import run
 
-            run(args.workspace)
+            run(args.workspace, lock_timeout=args.lock_timeout)
             return
         if args.command == "restore":
             from .backup import restore_backup
 
-            result = restore_backup(args.workspace, args.archive_path, args.data_dir)
+            result = restore_backup(
+                args.workspace, args.archive_path, args.data_dir, lock_timeout=args.lock_timeout
+            )
         elif args.command == "context":
             from .contexts import TEMPLATES
 
             result = TEMPLATES[args.name] if args.name else TEMPLATES
         else:
-            engine = OpenTruth(args.workspace)
+            engine = OpenTruth(args.workspace, lock_timeout=args.lock_timeout)
             try:
                 if args.command == "init":
-                    result = {"schema_version": 1, "status": "INITIALIZED"}
+                    result = {"schema_version": SCHEMA_VERSION, "status": "INITIALIZED"}
                 else:
                     inputs = json.loads(args.json)
                     if not isinstance(inputs, dict):
@@ -134,6 +146,9 @@ def main():
                         "context_template",
                         "file_path",
                         "source_type",
+                        "limit",
+                        "offset",
+                        "include_history",
                     ):
                         value = flags.get(field)
                         if value is None:
@@ -158,6 +173,17 @@ def main():
         )
         if isinstance(result, dict) and result.get("ok") is False:
             sys.exit(1)
+    except WorkspaceBusy:
+        print(
+            json.dumps(
+                {
+                    "error": "WORKSPACE_BUSY",
+                    "message": "Retry after the current operation finishes.",
+                }
+            ),
+            file=sys.stderr,
+        )
+        sys.exit(1)
     except (ValueError, TypeError, OSError, sqlite3.Error, zipfile.BadZipFile, KeyError):
         # Never include raw filesystem/SQLite/ZIP errors in client-facing messages.
         print(

@@ -1,0 +1,209 @@
+{
+  "schema_version": 1,
+  "exported_at": "2026-10-29T12:22:40.511052+00:00",
+  "files_included": false,
+  "claims": [
+    {
+      "original_statement": "SYNTHETIC legacy revised",
+      "subject": "legacy",
+      "predicate": "length",
+      "value": 1.0,
+      "unit": "m",
+      "context": {
+        "method": "synthetic"
+      },
+      "context_template": null,
+      "provenance": {
+        "synthetic": true,
+        "release": "v0.1.1"
+      },
+      "id": "033b214e-c85d-4a01-b972-b19dff64a69f",
+      "created_at": "2026-10-29T12:22:40.503461+00:00",
+      "review_status": "INCONCLUSIVE",
+      "normalized_statement": "SYNTHETIC legacy revised"
+    }
+  ],
+  "sources": [
+    {
+      "title": "SYNTHETIC legacy source",
+      "source_type": "OTHER",
+      "authors": [],
+      "doi": null,
+      "url": null,
+      "publication_date": null,
+      "id": "ad4e4a28-1759-428d-8576-c624a43b261d",
+      "registered_at": "2026-10-29T12:22:40.504927+00:00",
+      "verification_status": "NOT_EVALUATED",
+      "file_reference": "files/ad4e4a28-1759-428d-8576-c624a43b261d",
+      "sha256": "a3cd901f79ab94ebe7b4ff819d5ada72641543ba2c0f4d17c213e80d96ab380c",
+      "original_filename": "input.txt"
+    }
+  ],
+  "evidence_links": [
+    {
+      "claim_id": "033b214e-c85d-4a01-b972-b19dff64a69f",
+      "source_id": "ad4e4a28-1759-428d-8576-c624a43b261d",
+      "relationship": "SUPPORTS",
+      "source_location": "p1",
+      "excerpt": "SYNTHETIC legacy evidence",
+      "actor": "synthetic reviewer",
+      "id": "c68f08a4-bc05-440d-b7c0-dcc63d113e13",
+      "created_at": "2026-10-29T12:22:40.506412+00:00",
+      "review_status": "NEEDS_REVIEW",
+      "claim_revision": 1
+    }
+  ],
+  "claim_revisions": [
+    {
+      "original_statement": "SYNTHETIC legacy original",
+      "subject": "legacy",
+      "predicate": "length",
+      "value": 1.0,
+      "unit": "m",
+      "context": {
+        "method": "synthetic"
+      },
+      "context_template": null,
+      "provenance": {
+        "synthetic": true,
+        "release": "v0.1.1"
+      },
+      "id": "033b214e-c85d-4a01-b972-b19dff64a69f",
+      "normalized_statement": "SYNTHETIC legacy original",
+      "created_at": "2026-10-29T12:22:40.503461+00:00",
+      "review_status": "NEEDS_REVIEW"
+    },
+    {
+      "original_statement": "SYNTHETIC legacy revised",
+      "subject": "legacy",
+      "predicate": "length",
+      "value": 1.0,
+      "unit": "m",
+      "context": {
+        "method": "synthetic"
+      },
+      "context_template": null,
+      "provenance": {
+        "synthetic": true,
+        "release": "v0.1.1"
+      },
+      "id": "033b214e-c85d-4a01-b972-b19dff64a69f",
+      "created_at": "2026-10-29T12:22:40.503461+00:00",
+      "review_status": "NEEDS_REVIEW",
+      "normalized_statement": "SYNTHETIC legacy revised"
+    }
+  ],
+  "review_events": [
+    {
+      "timestamp": "2026-10-29T12:22:40.503747+00:00",
+      "action": "CLAIM_CREATED",
+      "entity_id": "033b214e-c85d-4a01-b972-b19dff64a69f",
+      "actor": null,
+      "details": {
+        "original_statement": "SYNTHETIC legacy original",
+        "subject": "legacy",
+        "predicate": "length",
+        "value": 1.0,
+        "unit": "m",
+        "context": {
+          "method": "synthetic"
+        },
+        "context_template": null,
+        "provenance": {
+          "synthetic": true,
+          "release": "v0.1.1"
+        },
+        "id": "033b214e-c85d-4a01-b972-b19dff64a69f",
+        "normalized_statement": "SYNTHETIC legacy original",
+        "created_at": "2026-10-29T12:22:40.503461+00:00",
+        "review_status": "NEEDS_REVIEW"
+      }
+    },
+    {
+      "timestamp": "2026-10-29T12:22:40.505249+00:00",
+      "action": "SOURCE_REGISTERED",
+      "entity_id": "ad4e4a28-1759-428d-8576-c624a43b261d",
+      "actor": null,
+      "details": {
+        "title": "SYNTHETIC legacy source",
+        "source_type": "OTHER",
+        "authors": [],
+        "doi": null,
+        "url": null,
+        "publication_date": null,
+        "id": "ad4e4a28-1759-428d-8576-c624a43b261d",
+        "registered_at": "2026-10-29T12:22:40.504927+00:00",
+        "verification_status": "NOT_EVALUATED",
+        "file_reference": "files/ad4e4a28-1759-428d-8576-c624a43b261d",
+        "sha256": "a3cd901f79ab94ebe7b4ff819d5ada72641543ba2c0f4d17c213e80d96ab380c",
+        "original_filename": "input.txt"
+      }
+    },
+    {
+      "timestamp": "2026-10-29T12:22:40.506854+00:00",
+      "action": "EVIDENCE_LINKED",
+      "entity_id": "033b214e-c85d-4a01-b972-b19dff64a69f",
+      "actor": "synthetic reviewer",
+      "details": {
+        "claim_id": "033b214e-c85d-4a01-b972-b19dff64a69f",
+        "source_id": "ad4e4a28-1759-428d-8576-c624a43b261d",
+        "relationship": "SUPPORTS",
+        "source_location": "p1",
+        "excerpt": "SYNTHETIC legacy evidence",
+        "actor": "synthetic reviewer",
+        "id": "c68f08a4-bc05-440d-b7c0-dcc63d113e13",
+        "created_at": "2026-10-29T12:22:40.506412+00:00",
+        "review_status": "NEEDS_REVIEW",
+        "claim_revision": 1
+      }
+    },
+    {
+      "timestamp": "2026-10-29T12:22:40.508261+00:00",
+      "action": "CLAIM_REVISED",
+      "entity_id": "033b214e-c85d-4a01-b972-b19dff64a69f",
+      "actor": null,
+      "details": {
+        "reason": "synthetic correction",
+        "revision": {
+          "original_statement": "SYNTHETIC legacy revised",
+          "subject": "legacy",
+          "predicate": "length",
+          "value": 1.0,
+          "unit": "m",
+          "context": {
+            "method": "synthetic"
+          },
+          "context_template": null,
+          "provenance": {
+            "synthetic": true,
+            "release": "v0.1.1"
+          },
+          "id": "033b214e-c85d-4a01-b972-b19dff64a69f",
+          "created_at": "2026-10-29T12:22:40.503461+00:00",
+          "review_status": "NEEDS_REVIEW",
+          "normalized_statement": "SYNTHETIC legacy revised"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-10-29T12:22:40.509899+00:00",
+      "action": "HUMAN_REVIEW",
+      "entity_id": "033b214e-c85d-4a01-b972-b19dff64a69f",
+      "actor": "synthetic reviewer",
+      "details": {
+        "decision": "INCONCLUSIVE",
+        "reason": "synthetic finding"
+      }
+    },
+    {
+      "timestamp": "2026-10-29T12:22:40.510954+00:00",
+      "action": "EXPORT",
+      "entity_id": "collection",
+      "actor": "synthetic fixture generator",
+      "details": {
+        "schema_version": 1
+      }
+    }
+  ],
+  "conflict_records": []
+}

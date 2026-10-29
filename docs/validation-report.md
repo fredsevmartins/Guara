@@ -1,46 +1,46 @@
-# v0.1.1 implementation validation
+# v0.1.2 implementation validation
 
 Validated on 2026-10-29 with Python 3.12.14/Linux, SQLite 3.53.1 (FTS5 available), MCP SDK 1.30.0,
-and Pydantic 2.14.1. This report distinguishes locally executed checks from configured remote jobs.
+and Pydantic 2.14.1. Local observations and configured remote jobs are distinct.
 
 | Check | Result |
 |---|---|
-| Editable installation with development dependencies | Passed |
-| `python -m pytest -q` | 81 passed, 0 failed, 0 skipped |
-| Real MCP subprocess/client integration | Passed; all ten tools called, valid/invalid inputs exercised |
-| `ruff check .` and `git diff --check` | Passed |
-| Four assertion-checked synthetic scenarios | Passed |
+| Full Pytest suite | 95 passed, 0 failed, 0 skipped |
+| Real MCP stdio client/server session | All twelve tools exercised, including revision/reassessment |
+| Ruff and Git whitespace checks | Passed |
+| Four synthetic scenarios and executable tutorial | Passed |
 | sdist and wheel builds | Passed |
-| Wheel installed into a fresh venv outside the checkout | Passed; evidence workflow, backup, restore, persistence |
-| Dependency consistency (`pip check`) | Passed |
-| CI and release workflow YAML syntax | Parsed successfully |
-| Python 3.11–3.13 on Linux/macOS/Windows | Configured in CI; remote results not confirmed locally |
-| GitHub Actions and Release status | API access blocked at the proxy; do not infer success from a tag push |
+| Strict Twine metadata check | Both packages passed |
+| Independent fresh-venv wheel evidence/backup/restore workflow | Passed |
+| Dependency consistency | Passed |
+| Historical fixtures included in sdist | Confirmed |
+| CI/Release/PyPI workflow YAML | Parsed successfully |
+| Cross-platform Python matrix | Configured; remote run results not confirmed |
+| GitHub CI/Release status | API still blocked by proxy CONNECT (403) |
+| PyPI publication | Not performed; no account credentials/bindings or Trusted Publisher available |
 | Coverage | Not measured |
-| ChatGPT connectivity | Not verified; local stdio MCP only |
 
-The suite covers original wording, revisions, provenance, source checksums, relationship histories,
-review attribution, exports, SQLite persistence, search, numerical contexts and unit conversions,
-tolerance boundaries, malformed inputs, corrupt/newer databases, SQL injection strings, filesystem
-traversal/symlinks, oversized/FIFO source files, collision-safe copying, CLI exit codes, and MCP.
+New tests verify bounded/stable pages, no history loading for lightweight search, index query-plan
+selection, persistent FTS updates, compact batched conflict audit references, history pagination,
+shared-instance thread serialization, cross-process busy errors (Python and CLI), prevention of
+backup/restore during another cooperating operation, and OS lock recovery after process termination.
+Migration tests copy frozen synthetic workspaces produced by the actual published v0.1.0/v0.1.1
+sources. All entity/history payloads, provenance and source hashes survive schema-2 upgrade. Tests
+append revisions, back up and restore, verify fixture bytes remain unchanged, restore a real old
+archive, and ensure failed index migration preserves schema 1 and its original record.
 
-New tests cover complete source-backed backup round trips, metadata-only portable backup/restore,
-changed/missing/unsafe stored files, source verification separation, refusal to overwrite stores or
-archives, byte tampering, forged manifest membership, archive traversal, duplicate members, size
-limits, corrupted database snapshots, database/source hash disagreement, safe restore failures,
-comparison explanations, finite JSON output at extreme numerical ranges, optional context
-checklists, readable CLI output, convenience arguments, and the platform-specific file-ingestion
-contract. Windows CI intentionally runs metadata/CLI/MCP tests instead of POSIX-only file-ingestion
-and filesystem-primitive tests. It does not claim equivalent local-file copying support.
+Earlier tests continue to cover claims, original wording, evidence, review history, source-file
+security and checksums, conservative numerical comparisons, context checklists, corrupt/unsafe
+archives, source-backed restores, persistence, CLI behavior and JSON serialization.
 
-Source directory mutation, restore, and simultaneous restores require a trusted single-user
-workspace. The backup format is bounded and checksummed, not encrypted or authenticated. These
-checks validate software behavior; they do not establish scientific reliability or comprehensive
-security. Earlier Mermaid syntax parsing succeeded for six diagrams; no diagrams changed in
-v0.1.1. Visual rendering remains unverified due to Chromium's local-file policy.
+`python scripts/benchmark.py --claims 5000` generated 5,000 synthetic claims in a temporary store.
+One local run observed 0.941 s insertion, 0.00074 s reopening, 0.00151 s for a filtered page of
+25 claims, and 0.00149 s for 49 matching comparisons. These are single local observations without
+cross-version controls or guaranteed performance. CI uses correctness assertions, not timings.
 
-The command sandbox restricts MCP subprocess communication and network access. The supported
-escalated command mode was used for the successful suite, installation, and builds, retaining proxy,
-TLS, and package verification. `api.github.com` remains denied at proxy CONNECT (HTTP 403). A saved
-network draft is not an applied policy. Publication outcomes are reported separately; the new
-GitHub release workflow is gated on its own CI results and uses least-privilege job permissions.
+The Windows CI selection includes metadata/CLI/MCP plus migration/concurrency/portable tests;
+secure local source ingestion remains POSIX-only. No local macOS/Windows execution is claimed.
+Six unchanged Mermaid sources were previously syntax-checked; visual rendering remains blocked
+by Chromium policy. Scientific reliability and comprehensive security are not established by this
+software validation. The supported escalated command mode was used for subprocess/network checks
+without disabling TLS or package verification. Publication outcomes are reported separately.

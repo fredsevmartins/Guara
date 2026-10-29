@@ -8,16 +8,19 @@ from mcp.server.fastmcp.exceptions import ToolError
 from pydantic import FiniteFloat, StrictFloat
 
 from .engine import OpenTruth
-from .models import Relationship, Review, SourceType
+from .locking import WorkspaceBusy
+from .models import Claim, Relationship, Review, SourceType
 
 
-def create_server(workspace="."):
-    engine = OpenTruth(workspace)
+def create_server(workspace=".", lock_timeout=5):
+    engine = OpenTruth(workspace, lock_timeout=lock_timeout)
     server = FastMCP("OpenTruth", instructions="Registered evidence is not objective truth.")
 
     def invoke(method, **arguments):
         try:
             return getattr(engine, method)(**arguments)
+        except WorkspaceBusy as error:
+            raise ToolError("WORKSPACE_BUSY: retry after the current operation finishes") from error
         except (ValueError, TypeError, OSError, sqlite3.Error) as error:
             raise ToolError(
                 "INVALID_INPUT_OR_STORAGE: check input, identifiers and workspace storage"
@@ -100,6 +103,9 @@ def create_server(workspace="."):
         subject: str | None = None,
         predicate: str | None = None,
         review_status: Review | None = None,
+        limit: int = 100,
+        offset: int = 0,
+        include_history: bool = False,
     ) -> list[dict]:
         """Search stored assertions and return registered evidence summaries."""
         return invoke(
@@ -109,12 +115,15 @@ def create_server(workspace="."):
             subject=subject,
             predicate=predicate,
             review_status=review_status,
+            limit=limit,
+            offset=offset,
+            include_history=include_history,
         )
 
     @server.tool()
-    def inspect_claim(claim_id: str) -> dict:
+    def inspect_claim(claim_id: str, include_history: bool = True) -> dict:
         """Inspect assertion, registered evidence, revisions and recorded conflict checks."""
-        return invoke("inspect_claim", claim_id=claim_id)
+        return invoke("inspect_claim", claim_id=claim_id, include_history=include_history)
 
     @server.tool()
     def check_conflicts(
@@ -122,16 +131,54 @@ def create_server(workspace="."):
         abs_tol: FiniteFloat = 0,
         rel_tol: FiniteFloat = 1e-9,
         actor: str | None = None,
+        limit: int = 100,
+        offset: int = 0,
     ) -> list[dict]:
         """Compare numeric values conservatively using registered context and units."""
         return invoke(
-            "check_conflicts", claim_id=claim_id, abs_tol=abs_tol, rel_tol=rel_tol, actor=actor
+            "check_conflicts",
+            claim_id=claim_id,
+            abs_tol=abs_tol,
+            rel_tol=rel_tol,
+            actor=actor,
+            limit=limit,
+            offset=offset,
         )
 
     @server.tool()
-    def get_claim_history(claim_id: str) -> list[dict]:
+    def get_claim_history(claim_id: str, limit: int = 100, offset: int = 0) -> list[dict]:
         """Return ordered append-only lifecycle events."""
-        return invoke("get_claim_history", claim_id=claim_id)
+        return invoke("get_claim_history", claim_id=claim_id, limit=limit, offset=offset)
+
+    @server.tool()
+    def revise_claim(
+        claim_id: str, reason: str, changes: dict[str, Any], actor: str | None = None
+    ) -> dict:
+        """Revise validated claim fields, preserving original versions and requiring reassessment."""
+        if set(changes) - set(Claim.model_fields):
+            raise ToolError("INVALID_INPUT_OR_STORAGE: only claim fields may be revised")
+        return invoke("revise_claim", claim_id=claim_id, reason=reason, actor=actor, **changes)
+
+    @server.tool()
+    def revise_evidence(
+        link_id: str,
+        reason: str,
+        actor: str,
+        relationship: Relationship | None = None,
+        source_location: str | None = None,
+        excerpt: str | None = None,
+    ) -> dict:
+        """Explicitly reassess evidence for the current claim revision, retaining prior assessments."""
+        changes = {
+            key: value
+            for key, value in {
+                "relationship": relationship,
+                "source_location": source_location,
+                "excerpt": excerpt,
+            }.items()
+            if value is not None
+        }
+        return invoke("revise_evidence", link_id=link_id, reason=reason, actor=actor, **changes)
 
     @server.tool()
     def review_claim(
@@ -155,5 +202,5 @@ def create_server(workspace="."):
     return server
 
 
-def run(workspace="."):
-    create_server(workspace).run(transport="stdio")
+def run(workspace=".", lock_timeout=5):
+    create_server(workspace, lock_timeout=lock_timeout).run(transport="stdio")

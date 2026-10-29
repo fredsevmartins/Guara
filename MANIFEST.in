@@ -3,3 +3,5 @@ recursive-include docs *.md *.mmd
 recursive-include examples *.py
 recursive-include assets *.svg
 recursive-include tests *.py
+
+recursive-include tests/fixtures *

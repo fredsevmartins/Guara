@@ -27,7 +27,7 @@ its evidence changed, without treating a saved answer as an established fact.
 - Explicit SUPPORTS, CONTRADICTS, RELATED, and INCONCLUSIVE relationships.
 - Keyword/phrase search, subject/property/review filters, evidence inspection, JSON export.
 - Conservative numeric comparison with context, units, and configurable tolerances.
-- Shared Python API, JSON CLI, and ten tools through the official MCP SDK (stdio).
+- Shared Python API, JSON CLI, and twelve tools through the official MCP SDK (stdio).
 
 ## Architecture
 
@@ -179,3 +179,17 @@ See [backup and integrity](docs/backup-and-integrity.md), [context templates](do
 and [platform support and releases](docs/platforms-and-releases.md). Windows supports metadata
 workflows; secure local source ingestion remains POSIX-only. The release workflow creates GitHub
 releases with package artifacts only after its configured checks pass.
+
+## Working with larger evidence stores (v0.1.2)
+
+Search/conflict checks are paginated (default 100, maximum 1000); search omits histories by default.
+Use `--include-history` or inspect a claim when needed. Cooperating CLI/MCP processes now serialize
+operations and report WORKSPACE_BUSY on timeout. MCP includes `revise_claim` and `revise_evidence`
+for explicit, auditable reassessment.
+
+Run `python -m examples.tutorial` for a complete synthetic walkthrough and
+`python scripts/benchmark.py --claims 5000` for a reproducible local observation. See
+[scaling/concurrency](docs/scaling-and-concurrency.md), [migration guarantees](docs/data-model.md),
+[the tutorial](docs/tutorial.md), and [optional PyPI publication](docs/pypi-publication.md).
+Schema 1 migrates to schema 2 without rewriting historical evidence; back up before upgrading.
+PyPI publication requires maintainer configuration and has not been confirmed.

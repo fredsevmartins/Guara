@@ -4,15 +4,21 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "opentruth"
-version = "0.1.1"
+version = "0.1.2"
 description = "Local-first evidence memory and verification toolkit for AI assistants"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
+keywords = ["evidence", "provenance", "mcp", "sqlite", "scientific-software"]
 dependencies = ["pydantic>=2.10,<3", "mcp>=1.26,<2"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.9", "build>=1"]
+
+[project.urls]
+Homepage = "https://github.com/fredsevmartins/OpenTruth"
+Documentation = "https://github.com/fredsevmartins/OpenTruth/tree/main/docs"
+Issues = "https://github.com/fredsevmartins/OpenTruth/issues"
 
 [project.scripts]
 opentruth = "opentruth.cli:main"

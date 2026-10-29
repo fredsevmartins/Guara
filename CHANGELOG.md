@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.2 — 2026-10-29
+
+- Paginated SQL filtering, indexed conflict candidates, optional history loading, persistent FTS triggers.
+- Transactional schema-2 index migration with frozen legacy snapshots and older archive tests.
+- Cross-process/thread operation locks with bounded waits, busy errors, and OS crash recovery.
+- Explicit claim/evidence reassessment through two additional MCP tools.
+- Executable synthetic tutorial, reproducible 5,000-claim benchmark, and manual PyPI OIDC workflow.
+- Registry publication remains pending maintainer Trusted Publisher configuration.
+
+
 ## 0.1.1 — 2026-10-29
 
 - Complete SQLite/source-file backups and validated restore into an absent data directory.

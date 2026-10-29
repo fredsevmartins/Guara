@@ -3,7 +3,6 @@
 import hashlib
 import json
 import os
-import sqlite3
 import stat
 from contextlib import contextmanager
 from datetime import UTC, datetime
@@ -14,7 +13,8 @@ from pydantic import TypeAdapter
 
 from .conflicts import compare, validate_tolerances
 from .contexts import context_warnings
-from .database import connect
+from .database import SCHEMA_VERSION, connect, initialize_search
+from .locking import WorkspaceLock, operation
 from .models import Claim, Link, Review, Source
 
 
@@ -30,11 +30,16 @@ def encoded(value):
 
 
 class OpenTruth:
-    def __init__(self, workspace=".", data_dir=".opentruth"):
+    def __init__(self, workspace=".", data_dir=".opentruth", lock_timeout=5):
         self.workspace = Path(workspace).resolve(strict=True)
         relative = Path(data_dir)
         if relative.is_absolute() or ".." in relative.parts:
             raise ValueError("Data directory must be workspace-relative without traversal")
+        self._operation_lock = WorkspaceLock(self.workspace, relative, lock_timeout)
+        with self._operation_lock:
+            self._initialize(relative)
+
+    def _initialize(self, relative):
         current = self.workspace
         for part in relative.parts:
             current = current / part
@@ -53,24 +58,13 @@ class OpenTruth:
         if dbpath.is_symlink():
             raise ValueError("Unsafe database path")
         self.db = connect(dbpath)
-        self.fts = True
         try:
-            self.db.execute(
-                "CREATE VIRTUAL TABLE IF NOT EXISTS claim_search USING fts5(id UNINDEXED, statement)"
-            )
-            # Rebuild from authoritative records, including DBs created without FTS5.
-            with self.db:
-                self.db.execute("DELETE FROM claim_search")
-                for record in self.db.execute("SELECT id,payload FROM claims").fetchall():
-                    self.db.execute(
-                        "INSERT INTO claim_search VALUES (?,?)",
-                        (record[0], json.loads(record[1])["original_statement"]),
-                    )
-        except sqlite3.OperationalError as error:
-            if "no such module" not in str(error):
-                raise
-            self.fts = False
+            self.fts = initialize_search(self.db)
+        except BaseException:
+            self.db.close()
+            raise
 
+    @operation
     def close(self):
         self.db.close()
 
@@ -94,6 +88,7 @@ class OpenTruth:
             "INSERT INTO review_events(entity_id,payload) VALUES (?,?)", (entity, encoded(event))
         )
 
+    @operation
     def add_claim(self, original_statement, actor=None, **attributes):
         data = Claim(original_statement=original_statement, **attributes).model_dump()
         data.update(
@@ -108,15 +103,12 @@ class OpenTruth:
                 "INSERT INTO claim_revisions(claim_id,payload) VALUES (?,?)",
                 (data["id"], encoded(data)),
             )
-            if self.fts:
-                self.db.execute(
-                    "INSERT INTO claim_search VALUES (?,?)", (data["id"], original_statement)
-                )
             self._event("CLAIM_CREATED", data["id"], actor, data)
         return dict(
             data, context_warnings=context_warnings(data["context"], data["context_template"])
         )
 
+    @operation
     def revise_claim(self, claim_id, reason, actor=None, **changes):
         if not reason.strip():
             raise ValueError("Revision reason required")
@@ -136,11 +128,6 @@ class OpenTruth:
                 "INSERT INTO claim_revisions(claim_id,payload) VALUES (?,?)",
                 (claim_id, encoded(data)),
             )
-            if self.fts:
-                self.db.execute(
-                    "UPDATE claim_search SET statement=? WHERE id=?",
-                    (data["original_statement"], claim_id),
-                )
             self._event("CLAIM_REVISED", claim_id, actor, {"reason": reason, "revision": data})
         return dict(
             data, context_warnings=context_warnings(data["context"], data["context_template"])
@@ -170,6 +157,7 @@ class OpenTruth:
         finally:
             os.close(directory)
 
+    @operation
     def register_source(self, title, actor=None, **attributes):
         model = Source(title=title, **attributes)
         data = model.model_dump(exclude={"file_path"})
@@ -222,6 +210,7 @@ class OpenTruth:
             raise
         return data
 
+    @operation
     def link_evidence(self, claim_id, source_id, relationship, source_location, excerpt, actor):
         data = Link(
             claim_id=claim_id,
@@ -247,6 +236,7 @@ class OpenTruth:
             self._event("EVIDENCE_LINKED", claim_id, actor, data)
         return data
 
+    @operation
     def revise_evidence(self, link_id, reason, **changes):
         if not reason.strip():
             raise ValueError("Revision reason required")
@@ -274,6 +264,7 @@ class OpenTruth:
             )
         return data
 
+    @operation
     def review_claim(self, claim_id, decision, reason="", actor=None):
         decision = TypeAdapter(Review).validate_python(decision)
         if not isinstance(reason, str) or (
@@ -289,12 +280,18 @@ class OpenTruth:
             self._event("HUMAN_REVIEW", claim_id, actor, {"decision": decision, "reason": reason})
         return data
 
-    def get_claim_history(self, claim_id):
+    @operation
+    def get_claim_history(self, claim_id, limit=None, offset=0):
+        if limit is not None:
+            self._pagination(limit, offset)
+        elif type(offset) is not int or offset < 0:
+            raise ValueError("Offset must be a nonnegative integer")
         self._get("claims", claim_id)
         return [
             json.loads(r[0])
             for r in self.db.execute(
-                "SELECT payload FROM review_events WHERE entity_id=? ORDER BY sequence", (claim_id,)
+                "SELECT payload FROM review_events WHERE entity_id=? ORDER BY sequence LIMIT ? OFFSET ?",
+                (claim_id, -1 if limit is None else limit, offset),
             )
         ]
 
@@ -303,7 +300,8 @@ class OpenTruth:
             "SELECT COUNT(*) FROM claim_revisions WHERE claim_id=?", (claim_id,)
         ).fetchone()[0]
 
-    def inspect_claim(self, claim_id):
+    @operation
+    def inspect_claim(self, claim_id, include_history=True):
         data = self._get("claims", claim_id)
         data["context_warnings"] = context_warnings(data["context"], data.get("context_template"))
         links = [
@@ -335,68 +333,90 @@ class OpenTruth:
             if "CONTRADICTS" in types
             else "INSUFFICIENT_EVIDENCE"
         )
-        data["revisions"] = [
-            json.loads(r[0])
-            for r in self.db.execute(
-                "SELECT payload FROM claim_revisions WHERE claim_id=? ORDER BY sequence",
-                (claim_id,),
-            )
-        ]
-        data["history"] = self.get_claim_history(claim_id)
-        data["potential_conflicts"] = [
-            json.loads(r[0])
-            for r in self.db.execute(
-                "SELECT payload FROM conflict_records WHERE claim_id=? ORDER BY rowid", (claim_id,)
-            )
-        ]
+        if include_history:
+            data["revisions"] = [
+                json.loads(r[0])
+                for r in self.db.execute(
+                    "SELECT payload FROM claim_revisions WHERE claim_id=? ORDER BY sequence",
+                    (claim_id,),
+                )
+            ]
+            data["history"] = self.get_claim_history(claim_id)
+            data["potential_conflicts"] = [
+                json.loads(r[0])
+                for r in self.db.execute(
+                    "SELECT payload FROM conflict_records WHERE claim_id=? ORDER BY rowid",
+                    (claim_id,),
+                )
+            ]
         return data
 
+    @operation
     def search_claims(
-        self, query="", exact_phrase=False, subject=None, predicate=None, review_status=None
+        self,
+        query="",
+        exact_phrase=False,
+        subject=None,
+        predicate=None,
+        review_status=None,
+        limit=100,
+        offset=0,
+        include_history=False,
     ):
+        self._pagination(limit, offset)
         if len(query) > 20000:
             raise ValueError("Query too long")
-        candidates = None
-        if query and self.fts:
-            tokens = [query] if exact_phrase else query.split()
+        conditions, parameters = [], []
+        for field, value in (
+            ("subject", subject),
+            ("predicate", predicate),
+            ("review_status", review_status),
+        ):
+            if value is not None:
+                conditions.append(f"json_extract(payload, '$.{field}') = ?")
+                parameters.append(value)
+        tokens = [query] if exact_phrase else query.split()
+        if query.strip() and self.fts:
             expression = " AND ".join('"' + token.replace('"', '""') + '"' for token in tokens)
-            if expression:
-                candidates = {
-                    r[0]
-                    for r in self.db.execute(
-                        "SELECT id FROM claim_search WHERE statement MATCH ?", (expression,)
-                    )
-                }
-        result = []
-        for row in self.db.execute("SELECT payload FROM claims ORDER BY rowid"):
-            data = json.loads(row[0])
-            text = data["original_statement"].casefold()
-            matches = (
-                query.casefold() in text
-                if exact_phrase
-                else all(token.casefold() in text for token in query.split())
+            conditions.append("id IN (SELECT id FROM claim_search WHERE statement MATCH ?)")
+            parameters.append(expression)
+        elif query:
+            self.db.create_function(
+                "opentruth_match",
+                1,
+                lambda statement: all(t.casefold() in statement.casefold() for t in tokens),
             )
-            if candidates is not None:
-                matches = data["id"] in candidates
-            if not matches or any(
-                value is not None and data[key] != value
-                for key, value in (
-                    ("subject", subject),
-                    ("predicate", predicate),
-                    ("review_status", review_status),
-                )
-            ):
-                continue
-            result.append(self.inspect_claim(data["id"]))
-        return result
+            conditions.append("opentruth_match(json_extract(payload, '$.original_statement'))")
+        where = " WHERE " + " AND ".join(conditions) if conditions else ""
+        rows = self.db.execute(
+            "SELECT id FROM claims" + where + " ORDER BY rowid LIMIT ? OFFSET ?",
+            (*parameters, limit, offset),
+        ).fetchall()
+        return [self.inspect_claim(row[0], include_history=include_history) for row in rows]
 
-    def check_conflicts(self, claim_id, abs_tol=0.0, rel_tol=1e-9, actor=None):
+    @staticmethod
+    def _pagination(limit, offset):
+        if (
+            type(limit) is not int
+            or not 1 <= limit <= 1000
+            or type(offset) is not int
+            or offset < 0
+        ):
+            raise ValueError("Pagination requires limit 1–1000 and a nonnegative offset")
+
+    @operation
+    def check_conflicts(self, claim_id, abs_tol=0.0, rel_tol=1e-9, actor=None, limit=100, offset=0):
+        self._pagination(limit, offset)
         validate_tolerances(abs_tol, rel_tol)
         claim = self._get("claims", claim_id)
         records = []
         with self.db:
             for row in self.db.execute(
-                "SELECT payload FROM claims WHERE id != ?", (claim_id,)
+                "SELECT payload FROM claims WHERE "
+                "json_extract(payload, '$.subject') IS ? AND "
+                "json_extract(payload, '$.predicate') IS ? AND id != ? "
+                "ORDER BY rowid LIMIT ? OFFSET ?",
+                (claim["subject"], claim["predicate"], claim_id, limit, offset),
             ).fetchall():
                 other = json.loads(row[0])
                 if (claim["subject"], claim["predicate"]) != (other["subject"], other["predicate"]):
@@ -408,13 +428,27 @@ class OpenTruth:
                     "INSERT INTO conflict_records VALUES (?,?,?)",
                     (record["id"], claim_id, encoded(record)),
                 )
-            self._event("CONFLICT_CHECK", claim_id, actor, {"comparisons": records})
+            self._event(
+                "CONFLICT_CHECK",
+                claim_id,
+                actor,
+                {
+                    "comparison_ids": [r["id"] for r in records],
+                    "limit": limit,
+                    "offset": offset,
+                },
+            )
         return records
 
+    @operation
     def export_evidence(self, actor=None):
         with self.db:
-            self._event("EXPORT", "collection", actor, {"schema_version": 1})
-            result = {"schema_version": 1, "exported_at": now(), "files_included": False}
+            self._event("EXPORT", "collection", actor, {"schema_version": SCHEMA_VERSION})
+            result = {
+                "schema_version": SCHEMA_VERSION,
+                "exported_at": now(),
+                "files_included": False,
+            }
             for table in (
                 "claims",
                 "sources",
@@ -429,12 +463,14 @@ class OpenTruth:
                 ]
         return result
 
+    @operation
     def verify_sources(self, source_id=None):
         """Compare stored bytes with recorded hashes; never verify scientific content."""
         from .integrity import verify_sources
 
         return verify_sources(self, source_id)
 
+    @operation
     def backup(self, archive_path):
         """Create a complete, consistent backup without overwriting an existing archive."""
         from .backup import create_backup

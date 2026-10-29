@@ -71,6 +71,10 @@ they do not authenticate archives. Restore only trusted backups. ZIP is not encr
 archives as carefully as the evidence itself. Interrupted backup creation may leave a partial
 output; an interrupted restore can leave a staging directory. Verify rather than trust filenames.
 
-Do not mutate source/storage directories, restore, or run multiple restores concurrently. This is
+Do not mutate source/storage directories outside the application. Cooperating restore/backup
+operations are now serialized by OS advisory locks; timeout yields WORKSPACE_BUSY. This is
 a single-user trusted-workspace workflow. SQLite snapshot consistency does not make external source
 files transactional. No JSON-export import, schema downgrade, or database repair is implemented.
+
+Backup format 1 accepts schema 1–2 snapshots. Opening a restored schema-1 store upgrades it to
+schema 2. See [migration guarantees](data-model.md) and [concurrency](scaling-and-concurrency.md).

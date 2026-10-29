@@ -48,7 +48,7 @@ def test_real_mcp_session(tmp_path):
         ):
             await session.initialize()
             listed = await session.list_tools()
-            assert len(listed.tools) == 10
+            assert len(listed.tools) == 12
 
             async def call(name, args):
                 result = await session.call_tool(name, args)
@@ -71,7 +71,7 @@ def test_real_mcp_session(tmp_path):
             )
             assert boolean_measurement.isError
             source = await call("register_source", {"title": "SYNTHETIC source"})
-            await call(
+            linked = await call(
                 "link_evidence",
                 {
                     "claim_id": a["id"],
@@ -104,6 +104,29 @@ def test_real_mcp_session(tmp_path):
             assert not history.isError and "HUMAN_REVIEW" in str(history)
             conflict = await session.call_tool("check_conflicts", {"claim_id": a["id"]})
             assert not conflict.isError
+            await call(
+                "revise_claim",
+                {
+                    "claim_id": a["id"],
+                    "reason": "synthetic correction",
+                    "changes": {"original_statement": "SYNTHETIC revised"},
+                    "actor": "tester",
+                },
+            )
+            stale = await call("inspect_claim", {"claim_id": a["id"]})
+            assert stale["evidence_status"] == "INSUFFICIENT_EVIDENCE"
+            await call(
+                "revise_evidence",
+                {
+                    "link_id": linked["id"],
+                    "reason": "synthetic reassessment",
+                    "actor": "tester",
+                    "relationship": "CONTRADICTS",
+                },
+            )
+            revised = await call("inspect_claim", {"claim_id": a["id"]})
+            assert revised["evidence_status"] == "CONTRADICTED_BY_REGISTERED_EVIDENCE"
+            assert revised["history"][-1]["actor"] == "tester"
             exported = await call("export_evidence", {})
             integrity = await call("verify_sources", {})
             assert integrity["ok"] is True
