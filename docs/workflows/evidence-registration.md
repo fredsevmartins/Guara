@@ -1,0 +1,13 @@
+# Evidence Relationship Graph — Synthetic
+
+```mermaid
+flowchart LR
+    S1[Synthetic source A] -->|SUPPORTS| C1[Synthetic claim 1]
+    S2[Synthetic source B] -->|CONTRADICTS| C1
+    S2 -->|RELATED| C2[Synthetic claim 2]
+    R[Synthetic reviewer: INCONCLUSIVE] --> C1
+    C1 --> H[(Review history)]
+    C2 --> H
+```
+
+[Mermaid source](evidence-registration.mmd)
