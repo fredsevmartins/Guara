@@ -5,6 +5,7 @@ from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 from mcp.server.fastmcp.exceptions import ToolError
+from pydantic import FiniteFloat, StrictFloat
 
 from .engine import OpenTruth
 from .models import Relationship, Review, SourceType
@@ -51,7 +52,7 @@ def create_server(workspace="."):
         original_statement: str,
         subject: str | None = None,
         predicate: str | None = None,
-        value: float | str | None = None,
+        value: StrictFloat | str | None = None,
         unit: str | None = None,
         context: dict[str, Any] | None = None,
         provenance: dict[str, Any] | None = None,
@@ -96,7 +97,7 @@ def create_server(workspace="."):
         exact_phrase: bool = False,
         subject: str | None = None,
         predicate: str | None = None,
-        review_status: str | None = None,
+        review_status: Review | None = None,
     ) -> list[dict]:
         """Search stored assertions and return registered evidence summaries."""
         return invoke(
@@ -115,7 +116,10 @@ def create_server(workspace="."):
 
     @server.tool()
     def check_conflicts(
-        claim_id: str, abs_tol: float = 0, rel_tol: float = 1e-9, actor: str | None = None
+        claim_id: str,
+        abs_tol: FiniteFloat = 0,
+        rel_tol: FiniteFloat = 1e-9,
+        actor: str | None = None,
     ) -> list[dict]:
         """Compare numeric values conservatively using registered context and units."""
         return invoke(
@@ -128,7 +132,9 @@ def create_server(workspace="."):
         return invoke("get_claim_history", claim_id=claim_id)
 
     @server.tool()
-    def review_claim(claim_id: str, decision: Review, reason: str, actor: str) -> dict:
+    def review_claim(
+        claim_id: str, decision: Review, reason: str = "", actor: str | None = None
+    ) -> dict:
         """Record an attributed review decision with reason, not a truth classification."""
         return invoke(
             "review_claim", claim_id=claim_id, decision=decision, reason=reason, actor=actor

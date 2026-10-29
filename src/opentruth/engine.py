@@ -177,6 +177,7 @@ class OpenTruth:
             original_filename=None,
         )
         target = None
+        copied = False
         if model.file_path:
             path = Path(model.file_path)
             if path.is_absolute() or ".." in path.parts:
@@ -189,6 +190,7 @@ class OpenTruth:
             digest = hashlib.sha256()
             try:
                 with self._source_file(path) as source, target.open("xb") as dest:
+                    copied = True
                     total = 0
                     while block := source.read(65536):
                         total += len(block)
@@ -197,7 +199,8 @@ class OpenTruth:
                         digest.update(block)
                         dest.write(block)
             except BaseException:
-                target.unlink(missing_ok=True)
+                if copied:
+                    target.unlink(missing_ok=True)
                 raise
             data.update(
                 file_reference="files/" + data["id"],
@@ -225,7 +228,12 @@ class OpenTruth:
         ).model_dump()
         self._get("claims", claim_id)
         self._get("sources", source_id)
-        data.update(id=str(uuid4()), created_at=now(), review_status="NEEDS_REVIEW")
+        data.update(
+            id=str(uuid4()),
+            created_at=now(),
+            review_status="NEEDS_REVIEW",
+            claim_revision=self._revision_number(claim_id),
+        )
         with self.db:
             self.db.execute(
                 "INSERT INTO evidence_links VALUES (?,?,?,?)",
@@ -243,7 +251,12 @@ class OpenTruth:
             raise ValueError("Evidence endpoints cannot be changed")
         data.update(changes)
         data = Link(**data).model_dump()
-        data.update(id=link_id, created_at=old["created_at"], review_status="NEEDS_REVIEW")
+        data.update(
+            id=link_id,
+            created_at=old["created_at"],
+            review_status="NEEDS_REVIEW",
+            claim_revision=self._revision_number(data["claim_id"]),
+        )
         with self.db:
             self.db.execute(
                 "UPDATE evidence_links SET payload=? WHERE id=?", (encoded(data), link_id)
@@ -256,10 +269,14 @@ class OpenTruth:
             )
         return data
 
-    def review_claim(self, claim_id, decision, reason, actor):
+    def review_claim(self, claim_id, decision, reason="", actor=None):
         decision = TypeAdapter(Review).validate_python(decision)
-        if not reason.strip() or not actor.strip():
-            raise ValueError("Review reason and actor required")
+        if not isinstance(reason, str) or (
+            decision in {"ACCEPTED_FOR_USE", "REJECTED"} and not reason.strip()
+        ):
+            raise ValueError("Acceptance and rejection require a reason")
+        if actor is not None and (not isinstance(actor, str) or not actor.strip()):
+            raise ValueError("Provided actor must not be blank")
         data = self._get("claims", claim_id)
         data["review_status"] = decision
         with self.db:
@@ -276,6 +293,11 @@ class OpenTruth:
             )
         ]
 
+    def _revision_number(self, claim_id):
+        return self.db.execute(
+            "SELECT COUNT(*) FROM claim_revisions WHERE claim_id=?", (claim_id,)
+        ).fetchone()[0]
+
     def inspect_claim(self, claim_id):
         data = self._get("claims", claim_id)
         links = [
@@ -284,10 +306,20 @@ class OpenTruth:
                 "SELECT payload FROM evidence_links WHERE claim_id=? ORDER BY rowid", (claim_id,)
             )
         ]
+        data["revision_number"] = self._revision_number(claim_id)
         data["evidence"] = [
-            dict(link, source=self._get("sources", link["source_id"])) for link in links
+            dict(
+                link,
+                source=self._get("sources", link["source_id"]),
+                applies_to_current_revision=(
+                    link.get("claim_revision", 1) == data["revision_number"]
+                ),
+            )
+            for link in links
         ]
-        types = {link["relationship"] for link in links}
+        types = {
+            link["relationship"] for link in data["evidence"] if link["applies_to_current_revision"]
+        }
         data["evidence_status"] = (
             "CONFLICTING_REGISTERED_EVIDENCE"
             if {"SUPPORTS", "CONTRADICTS"} <= types

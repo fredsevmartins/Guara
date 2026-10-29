@@ -30,6 +30,14 @@ class Claim(Input):
     context: dict[str, Any] = Field(default_factory=dict)
     provenance: dict[str, Any] = Field(default_factory=dict)
 
+    @field_validator("value", mode="before")
+    @classmethod
+    def reject_boolean_measurements(cls, value):
+        if isinstance(value, bool):
+            # Pydantic converts ValueError into a structured validation error.
+            raise ValueError("Boolean values are not numerical measurements")  # noqa: TRY004
+        return value
+
     @field_validator("original_statement")
     @classmethod
     def nonblank(cls, value):
@@ -47,6 +55,13 @@ class Source(Input):
     publication_date: str | None = None
     file_path: str | None = None
 
+    @field_validator("title")
+    @classmethod
+    def nonblank_title(cls, value):
+        if not value.strip():
+            raise ValueError("Source title must not be blank")
+        return value
+
 
 class Link(Input):
     claim_id: str
@@ -55,3 +70,10 @@ class Link(Input):
     source_location: str = Field(min_length=1, max_length=2000)
     excerpt: str = Field(min_length=1, max_length=20000)
     actor: str = Field(min_length=1, max_length=500)
+
+    @field_validator("source_location", "excerpt", "actor")
+    @classmethod
+    def nonblank_assessment(cls, value):
+        if not value.strip():
+            raise ValueError("Evidence assessment fields must not be blank")
+        return value

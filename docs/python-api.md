@@ -28,13 +28,19 @@ app.close()
 | inspect_claim | claim_id | — |
 | check_conflicts | claim_id | abs_tol=0, rel_tol=1e-9, actor |
 | get_claim_history | claim_id | — |
-| review_claim | claim_id, decision, reason, actor | — |
+| review_claim | claim_id, decision | reason, actor |
 | export_evidence | — | actor |
 
-Review decisions: ACCEPTED_FOR_USE, NEEDS_REVIEW, REJECTED, INCONCLUSIVE. All require a nonblank
-reason and actor. Unknown model fields and malformed UUIDs fail validation. Duplicate registration
+Review decisions: ACCEPTED_FOR_USE, NEEDS_REVIEW, REJECTED, INCONCLUSIVE. Acceptance and rejection
+require a nonblank reason. Actor attribution is optional; an omitted actor is stored as null,
+and a supplied actor must not be blank. No reviewer identity is invented. Evidence links still
+require explicit, nonblank actor, location, and excerpt. Boolean measurements are rejected.
+Unknown model fields and malformed UUIDs fail validation. Duplicate registration
 creates separate IDs (no inferred deduplication). Keyword search uses FTS5 AND tokens; exact phrase
 quotes the full phrase. The fallback uses case-insensitive substring checks; tokenization can differ.
+
+Inspection includes `revision_number` and each link's `applies_to_current_revision` flag. See the
+[evidence model](evidence-model.md) for reassessment after revisions and legacy record handling.
 
 Export format: `schema_version: 1`, `exported_at`, `files_included: false`, and arrays named for all
 six persisted entity/history tables. IDs and source file references are retained. Order within

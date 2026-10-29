@@ -49,6 +49,7 @@ def test_workflow_revision_review_export_persistence(engine, tmp_path):
         {"original_statement": " "},
         {"original_statement": "x" * 20001},
         {"original_statement": "x", "value": float("nan")},
+        {"original_statement": "x", "value": True},
         {"original_statement": "x", "unexpected": True},
         {"original_statement": "x", "context": {"huge": "x" * 100001}},
     ],
@@ -98,6 +99,19 @@ def test_duplicate_sources_are_separate_immutable_copies(engine, tmp_path):
     assert a["id"] != b["id"]
     assert a["sha256"] == b["sha256"]
     assert a["file_reference"] != b["file_reference"]
+
+
+def test_source_collision_preserves_existing_file(engine, tmp_path, monkeypatch):
+    from uuid import UUID
+
+    (tmp_path / "source").write_bytes(b"SYNTHETIC original")
+    existing = engine.register_source("SYNTHETIC source", file_path="source")
+    monkeypatch.setattr("opentruth.engine.uuid4", lambda: UUID(existing["id"]))
+    (tmp_path / "source").write_bytes(b"SYNTHETIC replacement")
+    with pytest.raises(FileExistsError):
+        engine.register_source("SYNTHETIC duplicate", file_path="source")
+    assert (engine.files / existing["id"]).read_bytes() == b"SYNTHETIC original"
+    assert engine.export_evidence()["sources"] == [existing]
 
 
 @pytest.mark.parametrize("identifier", ["bad", str(uuid4()), "'; DROP TABLE claims; --"])
@@ -222,3 +236,136 @@ def test_no_mutation_after_failed_revision(engine):
         engine.revise_claim(a["id"], "reason", extra="unknown")
     assert engine.inspect_claim(a["id"])["original_statement"] == "original"
     assert len(engine.get_claim_history(a["id"])) == 1
+
+
+def test_evidence_requires_reassessment_after_claim_revision(engine, tmp_path):
+    claim = engine.add_claim("SYNTHETIC: beam is red")
+    source = engine.register_source("SYNTHETIC: color observation")
+    link = engine.link_evidence(
+        claim["id"], source["id"], "SUPPORTS", "table 1", "red", "synthetic reviewer"
+    )
+    assert (
+        engine.inspect_claim(claim["id"])["evidence_status"] == "SUPPORTED_BY_REGISTERED_EVIDENCE"
+    )
+    engine.revise_claim(claim["id"], "correct color", original_statement="SYNTHETIC: beam is blue")
+    inspected = engine.inspect_claim(claim["id"])
+    assert inspected["evidence_status"] == "INSUFFICIENT_EVIDENCE"
+    assert inspected["evidence"][0]["applies_to_current_revision"] is False
+    assert inspected["evidence"][0]["excerpt"] == "red"
+    engine.revise_evidence(link["id"], "review revised wording", relationship="CONTRADICTS")
+    reopened = OpenTruth(tmp_path)
+    record = reopened.inspect_claim(claim["id"])
+    assert record["evidence_status"] == "CONTRADICTED_BY_REGISTERED_EVIDENCE"
+    assert record["evidence"][0]["claim_revision"] == 2
+    event = record["history"][-1]
+    assert event["details"]["previous"]["claim_revision"] == 1
+    reopened.close()
+
+
+def test_legacy_link_is_not_promoted_to_revised_claim(engine):
+    claim = engine.add_claim("SYNTHETIC: original")
+    source = engine.register_source("SYNTHETIC: source")
+    link = engine.link_evidence(claim["id"], source["id"], "SUPPORTS", "p1", "text", "tester")
+    del link["claim_revision"]
+    with engine.db:
+        engine.db.execute(
+            "UPDATE evidence_links SET payload=? WHERE id=?", (json.dumps(link), link["id"])
+        )
+    assert (
+        engine.inspect_claim(claim["id"])["evidence_status"] == "SUPPORTED_BY_REGISTERED_EVIDENCE"
+    )
+    engine.revise_claim(claim["id"], "change", value=2)
+    assert engine.inspect_claim(claim["id"])["evidence_status"] == "INSUFFICIENT_EVIDENCE"
+
+
+def test_reviews_do_not_fabricate_reviewer(engine):
+    claim = engine.add_claim("SYNTHETIC")
+    engine.review_claim(claim["id"], "NEEDS_REVIEW")
+    engine.review_claim(claim["id"], "INCONCLUSIVE")
+    engine.review_claim(claim["id"], "ACCEPTED_FOR_USE", "SYNTHETIC decision")
+    event = engine.get_claim_history(claim["id"])[-1]
+    assert event["actor"] is None
+    assert event["details"]["reason"] == "SYNTHETIC decision"
+    with pytest.raises(ValueError):
+        engine.review_claim(claim["id"], "REJECTED")
+
+
+@pytest.mark.parametrize("field", ["actor", "source_location", "excerpt"])
+def test_blank_evidence_assessment_is_rejected(engine, field):
+    claim = engine.add_claim("SYNTHETIC")
+    source = engine.register_source("SYNTHETIC")
+    arguments = {
+        "claim_id": claim["id"],
+        "source_id": source["id"],
+        "relationship": "SUPPORTS",
+        "source_location": "p1",
+        "excerpt": "SYNTHETIC",
+        "actor": "tester",
+    }
+    arguments[field] = "  \n"
+    with pytest.raises(ValueError):
+        engine.link_evidence(**arguments)
+    assert engine.inspect_claim(claim["id"])["evidence"] == []
+
+
+def test_comparison_preserves_inputs_after_revision(engine):
+    a = engine.add_claim(
+        "SYNTHETIC: 1m",
+        subject="beam",
+        predicate="length",
+        value=1,
+        unit="m",
+        context={"method": "synthetic"},
+    )
+    b = engine.add_claim(
+        "SYNTHETIC: 2m",
+        subject="beam",
+        predicate="length",
+        value=2,
+        unit="m",
+        context=a["context"],
+    )
+    engine.check_conflicts(a["id"])
+    engine.revise_claim(b["id"], "new measurement", value=1)
+    stored = engine.inspect_claim(a["id"])["potential_conflicts"][0]
+    assert stored["inputs"][1]["value"] == 2
+    assert stored["status"] == "POTENTIAL_CONFLICT"
+    assert engine.check_conflicts(a["id"])[0]["status"] == "NO_DETECTED_CONFLICT"
+
+
+def test_conversion_avoids_intermediate_overflow(engine):
+    a = engine.add_claim(
+        "SYNTHETIC: extreme",
+        subject="x",
+        predicate="mass",
+        value=1e308,
+        unit="g",
+        context={"method": "synthetic"},
+    )
+    b = engine.add_claim(
+        "SYNTHETIC: extreme",
+        subject="x",
+        predicate="mass",
+        value=1e305,
+        unit="kg",
+        context=a["context"],
+    )
+    assert compare(a, b)["status"] == "NO_DETECTED_CONFLICT"
+    b["value"] = 1e308
+    assert compare(a, b)["status"] == "NOT_EVALUATED"
+
+
+@pytest.mark.parametrize(
+    "difference,expected", [(0.125, "NO_DETECTED_CONFLICT"), (0.25, "POTENTIAL_CONFLICT")]
+)
+def test_absolute_tolerance_boundary(engine, difference, expected):
+    a = engine.add_claim(
+        "SYNTHETIC",
+        subject="x",
+        predicate="length",
+        value=1,
+        unit="m",
+        context={"method": "synthetic"},
+    )
+    b = dict(a, value=1 + difference)
+    assert compare(a, b, abs_tol=0.125, rel_tol=0)["status"] == expected

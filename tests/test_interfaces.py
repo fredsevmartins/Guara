@@ -66,6 +66,10 @@ def test_real_mcp_session(tmp_path):
                     "context": {"method": "A"},
                 },
             )
+            boolean_measurement = await session.call_tool(
+                "add_claim", {"original_statement": "SYNTHETIC: invalid", "value": True}
+            )
+            assert boolean_measurement.isError
             source = await call("register_source", {"title": "SYNTHETIC source"})
             await call(
                 "link_evidence",
@@ -92,6 +96,10 @@ def test_real_mcp_session(tmp_path):
                     "actor": "synthetic reviewer",
                 },
             )
+            unattributed = await call(
+                "review_claim", {"claim_id": a["id"], "decision": "NEEDS_REVIEW"}
+            )
+            assert unattributed["review_status"] == "NEEDS_REVIEW"
             history = await session.call_tool("get_claim_history", {"claim_id": a["id"]})
             assert not history.isError and "HUMAN_REVIEW" in str(history)
             conflict = await session.call_tool("check_conflicts", {"claim_id": a["id"]})

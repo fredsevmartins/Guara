@@ -30,6 +30,21 @@ def compare(a, b, abs_tol=0.0, rel_tol=1e-9):
             "reason": reason,
             "abs_tol": abs_tol,
             "rel_tol": rel_tol,
+            "inputs": [
+                {
+                    key: claim[key]
+                    for key in (
+                        "id",
+                        "original_statement",
+                        "subject",
+                        "predicate",
+                        "context",
+                        "value",
+                        "unit",
+                    )
+                }
+                for claim in (a, b)
+            ],
         }
 
     if (
@@ -53,7 +68,9 @@ def compare(a, b, abs_tol=0.0, rel_tol=1e-9):
     if u != v:
         if u not in UNITS or v not in UNITS or UNITS[u][0] != UNITS[v][0]:
             return result("INSUFFICIENT_COMPARABILITY", "Incompatible or unsupported units")
-        y = y * UNITS[v][1] / UNITS[u][1]
+        y = y * (UNITS[v][1] / UNITS[u][1])
+    if not math.isfinite(y):
+        return result("NOT_EVALUATED", "Unit conversion exceeds finite numeric range")
     if math.isclose(x, y, abs_tol=abs_tol, rel_tol=rel_tol):
         return result(
             "NO_DETECTED_CONFLICT", "Values agree within tolerances in first claim's unit"

@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS review_events(
 CREATE INDEX IF NOT EXISTS events_entity ON review_events(entity_id);
 CREATE TABLE IF NOT EXISTS conflict_records(
  id TEXT PRIMARY KEY, claim_id TEXT NOT NULL REFERENCES claims(id), payload TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS conflicts_claim ON conflict_records(claim_id);
 """
 
 

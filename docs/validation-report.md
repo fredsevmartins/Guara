@@ -1,37 +1,44 @@
-# v0.1 implementation validation
+# v0.1.0 implementation validation
 
-Validated locally on Python 3.12.14, SQLite, MCP SDK 1.29.0 and Pydantic 2.13.4.
+Validated on 2026-10-29 with Python 3.12.14, SQLite 3.53.1 (FTS5 available),
+MCP SDK 1.30.0, and Pydantic 2.14.1.
 
 | Check | Result |
 |---|---|
-| `python -m pip install -e ".[dev]"` | Passed |
-| `python -m pytest` | 40 passed, 0 failed, 0 skipped |
-| Real MCP subprocess/client integration | Passed, all nine tools called |
+| Editable installation with development dependencies | Passed |
+| `python -m pytest -q` | 52 passed, 0 failed, 0 skipped |
+| Real MCP subprocess/client integration | Passed; all nine tools called, valid and invalid inputs exercised |
 | `ruff check .` | Passed |
-| `python -m build` | Passed, sdist and wheel |
-| Wheel install and independent smoke test | Passed |
-| Four synthetic scenarios | Passed |
-| Six Mermaid source files | Parsed successfully with Mermaid |
-| Visual rendering | BLOCKED: Chromium administrator policy rejects local file navigation |
-| GitHub Actions status and README rendering | Not verified: GitHub API returns Forbidden |
+| `python -m examples.scenarios` | Passed; all four synthetic scenarios asserted |
+| `python -m build` | Passed; sdist and wheel generated |
+| Independent wheel installation and functional smoke test | Passed; source checksum, evidence, revision reassessment, review, export, restart persistence |
+| `python -m pip check` | Passed |
+| Six Mermaid source files | Parsed with Mermaid 11 and a DOM implementation; sanitization enabled |
+| Local diagram visual rendering | Blocked: Chromium policy rejects the CLI's local file navigation |
+| GitHub rendering and Actions status | Not verified; API access denied by the network proxy |
 | Coverage | Not measured |
 | Python 3.11 / 3.13 execution | Configured in CI, not locally executed |
-| ChatGPT compatibility | Not verified; no remote bridge provided |
+| ChatGPT connectivity | Not verified; no remote bridge provided |
 
 The suite exercises persistence, revisions, source checksums, audit preservation, search,
 relationship changes, reviews, exports, deterministic comparisons, contexts, unit conversions,
-tolerances, traversal and symlinks, FIFO/oversized file rejection, SQL injection strings,
+tolerance boundaries, traversal and symlinks, FIFO/oversized file rejection, SQL injection strings,
 malformed inputs/UUIDs, oversized records, duplicate source copies, corrupt/newer databases,
 CLI exit codes, and real MCP errors and successful calls.
 
-One dependency warning was observed: AnyIO's pytest plugin uses a pytest alias deprecated for
-pytest 10. It did not fail validation. The MCP SDK also emits a Pydantic settings warning when
-starting; the real stdio session completed successfully.
+Release-hardening regressions cover evidence reassessment after claim revision (including legacy
+links), comparison input preservation after revision, optional reviewer attribution, boolean
+measurement rejection through Python and MCP, blank evidence fields, conversion overflow, and
+source identifier collisions without deleting previously stored files.
 
-IMPLEMENTED / TESTED / DOCUMENTED: evidence foundation, Python API, JSON CLI, stdio MCP,
-synthetic examples, provenance, and deterministic numeric comparisons. These results do not
-validate scientific content or claim comprehensive security. No independent source verification,
-semantic reasoning, remote transport, or authenticated multi-user workflows are available.
-The README roadmap describes PLANNED capabilities only. Publication status and final commit
-are reported separately after verifying the Git remote. No release tag is created while external
-rendering and CI checks remain unverified.
+The restricted command sandbox initially timed out during MCP initialization and blocked network
+connections. The supported escalated execution mode allowed the same full suite to pass without
+changing tests or disabling verification. GitHub API requests remain blocked at proxy CONNECT
+(HTTP 403), even in that mode. The required `api.github.com` domain was added to the environment
+configuration draft; saving a draft does not apply the policy or grant repository permissions.
+
+No independent source verification, semantic reasoning, remote transport, or authenticated
+multi-user workflows are implemented. These results validate the development workflow, not
+scientific content or comprehensive security. The README roadmap contains planned capabilities
+only. Git publication and GitHub Release creation are separate operations; neither follows from
+local validation. Publication outcomes are reported separately.

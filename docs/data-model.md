@@ -20,3 +20,8 @@ inspect before manual cleanup. API history is append-only, but SQLite is not tam
 `PRAGMA user_version` is the migration marker. Version 0 initializes missing tables without dropping
 existing data; version 1 is reused; newer versions are rejected. Back up before upgrades. There is
 no import or automated repair command. Keep database and files together for a complete backup.
+
+The v0.1 hardening update adds optional JSON fields without changing table layout or schema
+version: evidence `claim_revision` and comparison `inputs`. Existing records are not rewritten.
+Missing link revisions are interpreted conservatively as revision 1; historical comparisons
+without `inputs` retain their original limitations. See the evidence and comparison guides.
