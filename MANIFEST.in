@@ -1,7 +1,8 @@
 include LICENSE *.md CITATION.cff
 recursive-include docs *.md *.mmd
 recursive-include examples *.py
-recursive-include assets *.svg
+recursive-include assets *.svg *.png
 recursive-include tests *.py
 
 recursive-include tests/fixtures *
+recursive-include scripts *.py

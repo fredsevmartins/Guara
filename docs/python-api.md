@@ -66,3 +66,18 @@ Search accepts `include_history=False`; `inspect_claim` accepts `include_history
 `OpenTruth` and `restore_backup` accept `lock_timeout=5` (0–60 seconds). Catch
 `opentruth.locking.WorkspaceBusy` to handle another client's active operation. See
 [scaling/concurrency](scaling-and-concurrency.md) for compatibility and snapshot limitations.
+
+## Guaranteed connection cleanup (0.1.3+)
+
+Use a context manager to close the SQLite connection even if your code raises an exception:
+
+```python
+from opentruth import OpenTruth
+
+with OpenTruth(workspace=".") as app:
+    claims = app.search_claims(limit=10)
+```
+
+This manages the connection lifetime. Each operation retains its existing transaction and audit
+behavior; the block does not combine operations into one transaction. Exceptions propagate to
+the caller. The existing explicit `app.close()` API remains supported.

@@ -1,18 +1,24 @@
-<img src="assets/logo.svg" width="96" alt="OpenTruth logo">
+<img src="assets/logo.svg" width="96" alt="Guara logo">
 
-# OpenTruth
+# Guara
 
 **Make AI Knowledge Verifiable.**
 
-## What is OpenTruth?
+Formerly OpenTruth. The Python package, CLI command, and `.opentruth/` storage name remain
+`opentruth` for compatibility. The project and repository are now named **Guara**.
+See [compatibility details](docs/repository-name.md).
 
-OpenTruth is a local-first evidence memory and verification toolkit for AI assistants,
+[Start here / Comece aqui](COMECE-AQUI.md) · [Documentation](docs/README.md) · [Português brasileiro](docs/pt-BR/README.md) · [Quickstart](docs/quickstart.md) · [Contributing](CONTRIBUTING.md)
+
+## What is Guara?
+
+Guara is a local-first evidence memory and verification toolkit for AI assistants,
 researchers, and engineers. It records claims, sources, explicit evidence relationships,
 reviews, and deterministic numerical conflict candidates in SQLite. It works offline,
 without an LLM, cloud account, or external database.
 
 A stored assertion is not necessarily true. A registered source is not necessarily reliable.
-A citation is not proof. OpenTruth manages evidence; it does not determine scientific truth.
+A citation is not proof. Guara manages evidence; it does not determine scientific truth.
 
 ## Why evidence memory matters
 
@@ -28,13 +34,15 @@ its evidence changed, without treating a saved answer as an established fact.
 - Keyword/phrase search, subject/property/review filters, evidence inspection, JSON export.
 - Conservative numeric comparison with context, units, and configurable tolerances.
 - Shared Python API, JSON CLI, and twelve tools through the official MCP SDK (stdio).
+- Verified-byte source checks, portable backup/restore, and paginated access.
+- Auditable claim/evidence reassessment and serialized cooperating CLI/MCP operations.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
     User --> Client[AI assistant / MCP client]
-    Client --> MCP[OpenTruth stdio MCP server]
+    Client --> MCP[Guara stdio MCP server]
     MCP --> Core[Evidence engine]
     CLI[CLI / Python API] --> Core
     Core --> DB[(SQLite)]
@@ -46,8 +54,8 @@ flowchart LR
 Python 3.11+ is required. No PyPI release is claimed.
 
 ```sh
-git clone https://github.com/fredsevmartins/OpenTruth.git
-cd OpenTruth
+git clone https://github.com/fredsevmartins/Guara.git
+cd Guara
 python -m venv .venv
 . .venv/bin/activate
 python -m pip install -e ".[dev]"
@@ -55,6 +63,10 @@ opentruth init
 ```
 
 ## Quick start
+
+Run this example from an authorized workspace after installation. It creates local data in
+`.opentruth/`. All demonstration measurements are synthetic. For a complete workflow, including
+reassessment and backup restoration, run `python -m examples.tutorial` from the checkout root.
 
 ```python
 from opentruth import OpenTruth
@@ -117,6 +129,7 @@ separate. See the [evidence model](docs/evidence-model.md).
 python -m pytest
 ruff check .
 python -m build
+python scripts/check_docs.py
 python -m examples.scenarios
 ```
 
@@ -136,6 +149,39 @@ v0.1 implements evidence memory, not semantic understanding, independent source 
 DOI fetching, authentication, or multi-user access control. JSON exports contain metadata and
 file references, not source bytes. See [limitations](docs/limitations.md) and [security](SECURITY.md).
 
+## Backups, integrity, and larger stores
+
+```sh
+opentruth --format text claim list --limit 100 --offset 0
+opentruth source verify
+opentruth backup snapshot.zip
+opentruth restore snapshot.zip --data-dir restored-evidence
+opentruth context templates engineering
+```
+
+Backups include a consistent SQLite snapshot and registered source files; JSON exports contain
+metadata and references only. Restore validates bytes and requires an absent destination directory.
+Byte integrity does not validate scientific content. Secure local source ingestion is POSIX-only;
+Windows supports metadata workflows.
+
+Search and conflict checks default to 100 results, with a maximum page size of 1000. Search omits
+history by default. Use `--include-history`, inspect a claim, or paginate history when needed.
+Cooperating CLI/MCP processes serialize operations and return `WORKSPACE_BUSY` on timeout.
+Back up before upgrading: schema 1 migrates to schema 2 while retaining historical evidence.
+
+See [backup and integrity](docs/backup-and-integrity.md), [scaling and concurrency](docs/scaling-and-concurrency.md),
+[context templates](docs/context-templates.md), and [platform support](docs/platforms-and-releases.md).
+The current package version is **0.1.3**; see the [release notes](docs/releases/v0.1.3.md).
+PyPI publication is optional maintainer configuration and has not been confirmed.
+
+## Meet Guará
+
+<img src="assets/mascot-guara.png" width="280" alt="Guará, a Brazilian maned wolf, examines an evidence notebook with a magnifying glass.">
+
+Guará is our maned wolf mascot, inspired by Brazil's fauna. His notebook and magnifying glass
+represent curiosity, traceability, and careful examination. He invites you to inspect evidence;
+he does not certify that a claim is true. See the [mascot guide](docs/mascot.md).
+
 ## Roadmap
 
 Planned only: v0.2 optional assisted extraction and confirmation; v0.3 semantic search,
@@ -152,44 +198,10 @@ assumptions and boundary tests.
 
 ## Citation
 
-Use [CITATION.cff](CITATION.cff) and cite the version used. Recording evidence with OpenTruth
+DOI: [10.5281/zenodo.23870405](https://doi.org/10.5281/zenodo.23870405).
+Use [CITATION.cff](CITATION.cff) and cite the version used. Recording evidence with Guara
 does not independently validate that evidence.
 
 ## License
 
-OpenTruth is available under the [MIT license](LICENSE).
-
-## Backup and integrity (v0.1.1)
-
-```sh
-opentruth claim add "SYNTHETIC: beam length is 1 m." --subject beam --predicate length --value 1 --unit m
-opentruth --format text claim list
-opentruth source verify
-opentruth backup snapshot.zip
-opentruth restore snapshot.zip --data-dir restored-evidence
-opentruth context templates engineering
-```
-
-JSON output and existing `--json` inputs remain supported. Backup includes a consistent SQLite
-snapshot and registered source files; restore validates bytes and never overwrites an existing
-data directory. Source integrity checks do not validate scientific content. Optional context
-checklists warn about missing fields and prevent unsupported comparisons using those templates.
-
-See [backup and integrity](docs/backup-and-integrity.md), [context templates](docs/context-templates.md),
-and [platform support and releases](docs/platforms-and-releases.md). Windows supports metadata
-workflows; secure local source ingestion remains POSIX-only. The release workflow creates GitHub
-releases with package artifacts only after its configured checks pass.
-
-## Working with larger evidence stores (v0.1.2)
-
-Search/conflict checks are paginated (default 100, maximum 1000); search omits histories by default.
-Use `--include-history` or inspect a claim when needed. Cooperating CLI/MCP processes now serialize
-operations and report WORKSPACE_BUSY on timeout. MCP includes `revise_claim` and `revise_evidence`
-for explicit, auditable reassessment.
-
-Run `python -m examples.tutorial` for a complete synthetic walkthrough and
-`python scripts/benchmark.py --claims 5000` for a reproducible local observation. See
-[scaling/concurrency](docs/scaling-and-concurrency.md), [migration guarantees](docs/data-model.md),
-[the tutorial](docs/tutorial.md), and [optional PyPI publication](docs/pypi-publication.md).
-Schema 1 migrates to schema 2 without rewriting historical evidence; back up before upgrading.
-PyPI publication requires maintainer configuration and has not been confirmed.
+Guara is available under the [MIT license](LICENSE).

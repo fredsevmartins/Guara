@@ -1,5 +1,6 @@
 """Install the built wheel in an isolated venv and exercise it outside the checkout."""
 
+import argparse
 import os
 import subprocess
 import tempfile
@@ -7,8 +8,14 @@ import tomllib
 import venv
 from pathlib import Path
 
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--wheel", type=Path, help="Wheel to install; defaults to the current version in dist/")
+args = parser.parse_args()
 version = tomllib.loads(Path("pyproject.toml").read_text())["project"]["version"]
-(wheel,) = Path("dist").glob(f"opentruth-{version}-*.whl")
+if args.wheel:
+    wheel = args.wheel.resolve(strict=True)
+else:
+    (wheel,) = Path("dist").glob(f"opentruth-{version}-*.whl")
 with tempfile.TemporaryDirectory() as directory:
     root = Path(directory)
     venv.EnvBuilder(with_pip=True).create(root / "venv")
@@ -37,7 +44,33 @@ app = OpenTruth("data", "restored")
 assert app.inspect_claim(a["id"])["original_statement"] == "SYNTHETIC wheel test"
 assert app.verify_sources()["ok"]
 app.close()
-print("Independent wheel workflow and restore: PASS")
+# Exercise the installed CLI from outside the source checkout.
+import json
+import subprocess
+import sys
+from importlib.metadata import version
+
+
+def cli(*args):
+    result = subprocess.run(
+        [sys.executable, "-I", "-m", "opentruth.cli", "--workspace", "cli-data", *args],
+        capture_output=True, text=True, check=True,
+    )
+    return result.stdout
+
+
+assert cli("--version").strip() == f"Guara {version('opentruth')}"
+assert not Path("cli-data").exists()
+Path("cli-data").mkdir()
+assert json.loads(cli("init"))["status"] == "INITIALIZED"
+claim = json.loads(cli("claim", "add", "SYNTHETIC installed CLI"))
+assert json.loads(cli("claim", "inspect", claim["id"]))["id"] == claim["id"]
+assert len(json.loads(cli("export"))["claims"]) == 1
+cli("backup", "cli-backup.zip")
+cli("restore", "cli-backup.zip", "--data-dir", "restored")
+with OpenTruth("cli-data", "restored") as restored:
+    assert restored.inspect_claim(claim["id"])["original_statement"] == "SYNTHETIC installed CLI"
+print("Independent wheel API, CLI, version, backup and restore: PASS")
 """,
         ],
         check=True,

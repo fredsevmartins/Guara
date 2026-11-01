@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.3 — 2026-11-01
+
+- Renamed the product and repository to Guara, retaining the `opentruth` Python/CLI/storage interfaces.
+- Reorganized documentation with a navigation index, platform installation guidance, and Brazilian Portuguese onboarding.
+- Added Guará, a Brazilian maned wolf mascot, and citation DOI 10.5281/zenodo.23870405.
+- Added `opentruth --version` for installation diagnostics and Python context-manager support for reliable connection cleanup.
+- Added local documentation-link validation and expanded isolated wheel checks to cover the installed CLI.
+
+
 ## 0.1.2 — 2026-10-29
 
 - Paginated SQL filtering, indexed conflict candidates, optional history loading, persistent FTS triggers.

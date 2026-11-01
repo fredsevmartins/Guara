@@ -33,4 +33,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ github.ref_name }}
-        run: gh release create "$RELEASE_TAG" dist/* --verify-tag --title "OpenTruth $RELEASE_TAG" --notes-file "docs/releases/$RELEASE_TAG.md"
+        run: gh release create "$RELEASE_TAG" dist/* --verify-tag --title "Guara $RELEASE_TAG" --notes-file "docs/releases/$RELEASE_TAG.md"

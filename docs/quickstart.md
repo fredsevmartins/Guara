@@ -1,6 +1,6 @@
 # Quickstart
 
-Run from a directory you authorize OpenTruth to read:
+Run from a directory you authorize Guara to read:
 
 ```sh
 opentruth init
