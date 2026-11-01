@@ -78,8 +78,8 @@ Para Python, use `from opentruth import OpenTruth` e consulte a [API](docs/pytho
 - DOI informado: https://doi.org/10.5281/zenodo.23870405.
 - O repositório remoto foi renomeado pelo proprietário para `fredsevmartins/Guara` e confirmado
   pela API do GitHub. Veja os [detalhes de compatibilidade](docs/repository-name.md).
-- A entrega será disponibilizada em uma branch e PR de revisão, com artefatos em release de
-  rascunho. Nenhuma publicação no PyPI ou alteração da branch principal faz parte desta entrega.
+- A entrega está na branch `guara-0.1.3-ready`, com PR de revisão e arquivos instaláveis
+  em `delivery/0.1.3`. Nenhuma publicação no PyPI ou alteração da branch principal faz parte desta entrega.
 
 Fontes registradas e bytes íntegros não estabelecem verdade científica. A ingestão segura de
 arquivos locais exige POSIX; no Windows, use os fluxos de metadados. Consulte as
