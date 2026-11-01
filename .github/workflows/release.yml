@@ -29,8 +29,9 @@ jobs:
           assert pathlib.Path('docs/releases/' + os.environ['RELEASE_TAG'] + '.md').is_file()
           PY
       - run: python -m build
+      - run: python scripts/prepare_release.py
       - name: Publish tested artifacts and release notes
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ github.ref_name }}
-        run: gh release create "$RELEASE_TAG" dist/* --verify-tag --title "OpenTruth $RELEASE_TAG" --notes-file "docs/releases/$RELEASE_TAG.md"
+        run: gh release create "$RELEASE_TAG" release-assets/* --verify-tag --title "Guara $RELEASE_TAG" --notes-file "docs/releases/$RELEASE_TAG.md"

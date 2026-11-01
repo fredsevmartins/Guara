@@ -9,3 +9,4 @@ dist/
 .opentruth/
 
 .opentruth-lock-*
+release-assets/

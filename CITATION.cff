@@ -1,10 +1,11 @@
 cff-version: 1.2.0
-message: "If you use OpenTruth, cite this software and the version used."
-title: "OpenTruth: Make AI Knowledge Verifiable"
+message: "If you use Guara, cite this software and the version used."
+title: "Guara: Make AI Knowledge Verifiable"
 type: software
-version: 0.1.2
-date-released: 2026-10-29
+doi: "10.5281/zenodo.23870405"
+version: 0.1.3
+date-released: 2026-11-02
 license: MIT
-repository-code: "https://github.com/fredsevmartins/OpenTruth"
+repository-code: "https://github.com/fredsevmartins/Guara"
 authors:
   - name: "fredsevmartins"

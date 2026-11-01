@@ -31,7 +31,7 @@ record comparison IDs in audit events, avoiding duplication of whole comparison 
 Operations acquire an exclusive OS advisory lock for the canonical workspace/data-directory pair.
 This serializes reads, writes, initialization, source copying, backup, and restore across cooperating
 processes; an instance also serializes threads. Multi-step changes retain SQLite transactions.
-Locks protect read-modify-write sequences from other OpenTruth clients. The default wait is five
+Locks protect read-modify-write sequences from other Guara clients. The default wait is five
 seconds; Python `OpenTruth(..., lock_timeout=...)` and `restore_backup(..., lock_timeout=...)` accept
 0–60 seconds. A timeout produces `WorkspaceBusy` in Python and `WORKSPACE_BUSY` in CLI/MCP responses.
 Retry once the other operation has finished; do not delete lock files to bypass the lock.

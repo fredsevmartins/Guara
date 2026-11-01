@@ -64,6 +64,14 @@ class OpenTruth:
             self.db.close()
             raise
 
+    def __enter__(self):
+        """Use an evidence store in a block that always closes its connection."""
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+        return False
+
     @operation
     def close(self):
         self.db.close()

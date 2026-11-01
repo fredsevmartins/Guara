@@ -14,7 +14,7 @@ from .models import Claim, Relationship, Review, SourceType
 
 def create_server(workspace=".", lock_timeout=5):
     engine = OpenTruth(workspace, lock_timeout=lock_timeout)
-    server = FastMCP("OpenTruth", instructions="Registered evidence is not objective truth.")
+    server = FastMCP("Guara", instructions="Registered evidence is not objective truth.")
 
     def invoke(method, **arguments):
         try:

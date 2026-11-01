@@ -5,6 +5,7 @@ import json
 import sqlite3
 import sys
 import zipfile
+from importlib.metadata import version
 
 from .database import SCHEMA_VERSION
 from .engine import OpenTruth
@@ -48,7 +49,8 @@ def readable(result):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="OpenTruth — Make AI Knowledge Verifiable.")
+    parser = argparse.ArgumentParser(description="Guara — Make AI Knowledge Verifiable.")
+    parser.add_argument("--version", action="version", version=f"Guara {version('opentruth')}")
     parser.add_argument("--workspace", default=".", help="Allowed workspace and data root")
     parser.add_argument(
         "--lock-timeout", type=float, default=5, help="Operation lock wait, 0–60 seconds"

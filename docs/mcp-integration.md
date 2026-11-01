@@ -1,6 +1,6 @@
 # MCP integration
 
-OpenTruth uses the official Python MCP SDK and defaults to stdio. Start it with:
+Guara uses the official Python MCP SDK and defaults to stdio. Start it with:
 
 ```sh
 opentruth --workspace /absolute/allowed/workspace mcp
@@ -13,7 +13,7 @@ settings), supply the absolute executable and workspace:
 {
   "mcpServers": {
     "opentruth": {
-      "command": "/absolute/OpenTruth/.venv/bin/opentruth",
+      "command": "/absolute/Guara/.venv/bin/opentruth",
       "args": ["--workspace", "/absolute/allowed/workspace", "mcp"]
     }
   }
