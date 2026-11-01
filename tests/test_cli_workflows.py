@@ -122,3 +122,28 @@ def test_cli_explicit_tolerances_control_numeric_comparison(tmp_path):
     tolerant = success(tmp_path, "conflicts", "check", claim["id"], "--abs-tol", "0.2", "--rel-tol", "0")
     assert strict[0]["status"] == "POTENTIAL_CONFLICT"
     assert tolerant[0]["status"] == "NO_DETECTED_CONFLICT"
+
+
+def test_cli_uses_utf8_even_with_legacy_redirected_stream_encoding(tmp_path):
+    import os
+    import subprocess
+    import sys
+
+    statement = "SYNTHETIC: viga α — revisão e medição."
+    environment = dict(os.environ, PYTHONIOENCODING="cp1252", PYTHONUTF8="0")
+    command = [sys.executable, "-m", "opentruth.cli", "--workspace", str(tmp_path)]
+    added = subprocess.run(
+        [*command, "claim", "add", statement], env=environment, capture_output=True, timeout=10, check=False,
+    )
+    assert added.returncode == 0, added.stderr
+    claim = json.loads(added.stdout.decode("utf-8"))
+    assert claim["original_statement"] == statement
+    inspected = subprocess.run(
+        [*command, "--format", "text", "claim", "inspect", claim["id"]],
+        env=environment, capture_output=True, timeout=10, check=False,
+    )
+    assert inspected.returncode == 0, inspected.stderr
+    assert statement in inspected.stdout.decode("utf-8")
+    with OpenTruth(tmp_path) as app:
+        assert len(app.search_claims()) == 1
+        assert len(app.get_claim_history(claim["id"])) == 1

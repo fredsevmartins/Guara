@@ -15,6 +15,7 @@ def cli(workspace, *args):
         check=False,
         capture_output=True,
         text=True,
+        encoding="utf-8",
     )
 
 

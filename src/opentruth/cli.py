@@ -51,6 +51,11 @@ def readable(result):
 
 
 def main():
+    # JSON and scientific text must remain UTF-8 even when Windows redirects a pipe
+    # using a legacy locale. Configure before any operation can commit its data.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description="Guara — Make AI Knowledge Verifiable.")
     parser.add_argument("--version", action="version", version=f"Guara {version('opentruth')}")
     parser.add_argument("--workspace", default=".", help="Allowed workspace and data root")

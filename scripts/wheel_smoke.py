@@ -54,7 +54,7 @@ from importlib.metadata import version
 def cli(*args):
     result = subprocess.run(
         [sys.executable, "-I", "-m", "opentruth.cli", "--workspace", "cli-data", *args],
-        capture_output=True, text=True, check=True,
+        capture_output=True, text=True, encoding="utf-8", check=True,
     )
     return result.stdout
 
@@ -72,7 +72,7 @@ link = json.loads(cli(
 ))
 cli("review", claim["id"], "--decision", "INCONCLUSIVE", "--actor", "installer")
 cli(
-    "claim", "revise", claim["id"], "--statement", "SYNTHETIC revised installed CLI",
+    "claim", "revise", claim["id"], "--statement", "SYNTHETIC revised installed CLI α — revisão",
     "--reason", "SYNTHETIC correction", "--actor", "installer",
 )
 assert json.loads(cli("claim", "inspect", claim["id"]))["evidence_status"] == "INSUFFICIENT_EVIDENCE"
@@ -85,7 +85,7 @@ assert len(json.loads(cli("export"))["claims"]) == 1
 cli("backup", "cli-backup.zip")
 cli("restore", "cli-backup.zip", "--data-dir", "restored")
 with OpenTruth("cli-data", "restored") as restored:
-    assert restored.inspect_claim(claim["id"])["original_statement"] == "SYNTHETIC revised installed CLI"
+    assert restored.inspect_claim(claim["id"])["original_statement"] == "SYNTHETIC revised installed CLI α — revisão"
     assert restored.inspect_claim(claim["id"])["evidence_status"] == "CONTRADICTED_BY_REGISTERED_EVIDENCE"
 print("Independent wheel API, CLI lifecycle, version, backup and restore: PASS")
 """,

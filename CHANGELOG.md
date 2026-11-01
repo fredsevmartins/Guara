@@ -8,6 +8,7 @@
 - Added `opentruth --version` for installation diagnostics and Python context-manager support for reliable connection cleanup.
 - Added local documentation-link validation and expanded isolated wheel checks to cover the installed CLI.
 - Added terminal flags for combined search, attributed evidence linking/reassessment, claim correction, human review, and numeric tolerances without JSON wrappers.
+- Fixed redirected CLI output to use UTF-8 on Windows, preserving scientific symbols and avoiding false failures after successful saves.
 - Added full CLI lifecycle/backup tests and failed-operation atomicity regressions.
 - Automated complete release ZIP and checksum generation, archive/version validation tests, and CI-gated publication.
 - Included English LinkedIn artwork and GitHub release installation/verification guidance.

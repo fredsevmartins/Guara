@@ -1,5 +1,9 @@
 # CLI reference
 
+CLI stdout and stderr use UTF-8, including Windows redirected output. Python consumers should
+use `subprocess.run(..., text=True, encoding="utf-8")`; JSON decoding preserves original accents
+and scientific symbols. This avoids reporting a failed command after a Unicode record was saved.
+
 `opentruth --workspace PATH COMMAND` uses PATH as the allowed workspace. Default: current directory.
 `opentruth --help` lists commands. `opentruth --version` reports the installed package version
 without creating or opening a workspace. Every operational command accepts `--json '{}'` containing a
