@@ -7,6 +7,8 @@
 - Added Guará, a Brazilian maned wolf mascot, and citation DOI 10.5281/zenodo.23870405.
 - Added `opentruth --version` for installation diagnostics and Python context-manager support for reliable connection cleanup.
 - Added local documentation-link validation and expanded isolated wheel checks to cover the installed CLI.
+- Added terminal flags for combined search, attributed evidence linking/reassessment, claim correction, human review, and numeric tolerances without JSON wrappers.
+- Added full CLI lifecycle/backup tests and failed-operation atomicity regressions.
 - Automated complete release ZIP and checksum generation, archive/version validation tests, and CI-gated publication.
 - Included English LinkedIn artwork and GitHub release installation/verification guidance.
 

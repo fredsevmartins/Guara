@@ -23,6 +23,9 @@ transparent background. Use it in the README, documentation, onboarding, and com
 Keep its aspect ratio and leave space around the full silhouette. Use the existing
 [logo](../assets/logo.svg) where a simpler mark is needed; Guará complements that mark.
 
+The [social artwork](media.md) includes a scientist variant with a white lab coat, teal goggles,
+and bold cartoon outlines. The character remains a maned wolf.
+
 Suggested display width: 240–360 pixels in documentation. For small placements, check that the
 ears and long legs remain legible. Add descriptive alternative text, for example:
 

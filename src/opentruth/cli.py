@@ -6,10 +6,12 @@ import sqlite3
 import sys
 import zipfile
 from importlib.metadata import version
+from typing import get_args
 
 from .database import SCHEMA_VERSION
 from .engine import OpenTruth
 from .locking import WorkspaceBusy
+from .models import Relationship, Review
 
 COMMANDS = {
     ("source", "add"): "register_source",
@@ -81,6 +83,10 @@ def main():
             "register_source": "title",
             "verify_sources": "source_id",
             "inspect_claim": "claim_id",
+            "revise_claim": "claim_id",
+            "review_claim": "claim_id",
+            "link_evidence": "claim_id",
+            "revise_evidence": "link_id",
             "get_claim_history": "claim_id",
             "check_conflicts": "claim_id",
             "backup": "archive_path",
@@ -92,7 +98,12 @@ def main():
             command.add_argument("--offset", type=int)
         if method in {"search_claims", "inspect_claim"}:
             command.add_argument("--include-history", action="store_true", default=None)
-        if method == "add_claim":
+        if method == "search_claims":
+            for field in ("query", "subject", "predicate"):
+                command.add_argument("--" + field)
+            command.add_argument("--review-status", choices=get_args(Review))
+            command.add_argument("--exact-phrase", action="store_true", default=None)
+        if method in {"add_claim", "revise_claim"}:
             for field in (
                 "subject",
                 "predicate",
@@ -103,6 +114,26 @@ def main():
                 "context_template",
             ):
                 command.add_argument("--" + field.replace("_", "-"))
+        if method == "revise_claim":
+            command.add_argument("--statement", dest="original_statement")
+        if method in {"revise_claim", "revise_evidence", "review_claim"}:
+            command.add_argument("--reason")
+        if method in {"link_evidence", "revise_evidence"}:
+            command.add_argument("--relationship", choices=get_args(Relationship))
+            command.add_argument("--location", dest="source_location")
+            command.add_argument("--excerpt")
+        if method == "link_evidence":
+            command.add_argument("source_id", nargs="?")
+        if method == "review_claim":
+            command.add_argument("--decision", choices=get_args(Review))
+        if method == "check_conflicts":
+            command.add_argument("--abs-tol", type=float)
+            command.add_argument("--rel-tol", type=float)
+        if method in {
+            "add_claim", "register_source", "revise_claim", "review_claim", "link_evidence",
+            "revise_evidence", "check_conflicts", "export_evidence",
+        }:
+            command.add_argument("--actor")
         if method == "register_source":
             command.add_argument("--file", dest="file_path")
             command.add_argument("--type", dest="source_type")
@@ -134,6 +165,18 @@ def main():
                         raise ValueError("--json must be an object")
                     flags = vars(args)
                     for field in (
+                        "query",
+                        "exact_phrase",
+                        "review_status",
+                        "link_id",
+                        "relationship",
+                        "source_location",
+                        "excerpt",
+                        "actor",
+                        "reason",
+                        "decision",
+                        "abs_tol",
+                        "rel_tol",
                         "original_statement",
                         "title",
                         "source_id",

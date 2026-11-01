@@ -81,6 +81,7 @@ def prepare_release(dist_dir, output_dir, version):
         "assets/mascot-guara.png",
         "assets/social/guara-linkedin-en.png",
         "assets/social/guara-linkedin-white-en.png",
+        "assets/social/guara-linkedin-cartoon-en.png",
     ):
         if name in contents:
             destination = output_dir / PurePosixPath(name).name

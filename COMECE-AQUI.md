@@ -52,7 +52,7 @@ Crie uma pasta para seu trabalho. Os comandos abaixo usam uma pasta nova chamada
 mkdir meus-dados
 opentruth --workspace meus-dados init
 opentruth --workspace meus-dados claim add "SYNTHETIC: beam Q is 1 m long." --subject "beam Q" --predicate length --value 1 --unit m
-opentruth --workspace meus-dados --format text claim list
+opentruth --workspace meus-dados --format text claim list --query beam
 opentruth --workspace meus-dados export > evidence.json
 opentruth --workspace meus-dados backup snapshot.zip
 ```
@@ -73,7 +73,7 @@ Para Python, use `from opentruth import OpenTruth` e consulte a [API](docs/pytho
 
 ## Estado da entrega
 
-- Versão 0.1.3: 106 testes aprovados em Linux/Python 3.12, incluindo sessão MCP real.
+- Versão 0.1.3: 115 testes aprovados em Linux/Python 3.12, incluindo sessão MCP real.
 - Tutorial, cenários sintéticos, Ruff, links locais e instalação isolada do wheel aprovados.
 - Mascote Guará corrigido: dois braços e duas pernas; arte em `assets/mascot-guara.png`.
 - DOI informado: https://doi.org/10.5281/zenodo.23870405.
