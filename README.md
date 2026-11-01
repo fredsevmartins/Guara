@@ -49,6 +49,20 @@ flowchart LR
     Core --> Files[Local source files]
 ```
 
+## Install a release
+
+Download the wheel or complete ZIP from [GitHub Releases](https://github.com/fredsevmartins/Guara/releases).
+In an activated Python 3.11+ virtual environment:
+
+```sh
+python -m pip install /path/to/opentruth-0.1.3-py3-none-any.whl
+opentruth --version
+```
+
+The ZIP includes the wheel, source distribution, documentation, synthetic tutorial, and mascot.
+Release downloads include `SHA256SUMS`; see [release verification](docs/releasing.md).
+The initial installation downloads Python dependencies. Installed local operations work offline.
+
 ## Install from source
 
 Python 3.11+ is required. No PyPI release is claimed.
@@ -130,6 +144,7 @@ python -m pytest
 ruff check .
 python -m build
 python scripts/check_docs.py
+python scripts/prepare_release.py
 python -m examples.scenarios
 ```
 
@@ -180,7 +195,7 @@ PyPI publication is optional maintainer configuration and has not been confirmed
 
 Guará is our maned wolf mascot, inspired by Brazil's fauna. His notebook and magnifying glass
 represent curiosity, traceability, and careful examination. He invites you to inspect evidence;
-he does not certify that a claim is true. See the [mascot guide](docs/mascot.md).
+he does not certify that a claim is true. See the [mascot guide](docs/mascot.md) and [English LinkedIn artwork](docs/media.md).
 
 ## Roadmap
 

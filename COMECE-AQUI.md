@@ -6,6 +6,7 @@ classe continuam sendo `opentruth` e `OpenTruth`, para compatibilidade.
 
 ## Instalar o produto
 
+Baixe o ZIP ou o wheel em [GitHub Releases](https://github.com/fredsevmartins/Guara/releases).
 Requer Python 3.11 ou superior. Extraia o arquivo `Guara-0.1.3.zip`, abra um terminal dentro
 da pasta `Guara` e execute:
 
@@ -72,14 +73,15 @@ Para Python, use `from opentruth import OpenTruth` e consulte a [API](docs/pytho
 
 ## Estado da entrega
 
-- Versão 0.1.3: 98 testes aprovados em Linux/Python 3.12, incluindo sessão MCP real.
+- Versão 0.1.3: 106 testes aprovados em Linux/Python 3.12, incluindo sessão MCP real.
 - Tutorial, cenários sintéticos, Ruff, links locais e instalação isolada do wheel aprovados.
 - Mascote Guará corrigido: dois braços e duas pernas; arte em `assets/mascot-guara.png`.
 - DOI informado: https://doi.org/10.5281/zenodo.23870405.
 - O repositório remoto foi renomeado pelo proprietário para `fredsevmartins/Guara` e confirmado
   pela API do GitHub. Veja os [detalhes de compatibilidade](docs/repository-name.md).
-- A entrega está na branch `guara-0.1.3-ready`, com PR de revisão e arquivos instaláveis
-  em `delivery/0.1.3`. Nenhuma publicação no PyPI ou alteração da branch principal faz parte desta entrega.
+- Os arquivos públicos da versão ficam em [GitHub Releases](https://github.com/fredsevmartins/Guara/releases),
+  com ZIP completo, wheel, código-fonte, mascote, arte de divulgação e checksums SHA-256.
+- O pacote e o comando continuam sendo `opentruth`; publicação no PyPI não faz parte desta entrega.
 
 Fontes registradas e bytes íntegros não estabelecem verdade científica. A ingestão segura de
 arquivos locais exige POSIX; no Windows, use os fluxos de metadados. Consulte as

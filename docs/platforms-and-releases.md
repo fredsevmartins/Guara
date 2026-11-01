@@ -17,7 +17,9 @@ concurrent filesystem changes. This is not protection against a malicious local 
 
 `.github/workflows/release.yml` runs on version-tag pushes. It reuses the full CI matrix and only
 creates a GitHub Release after all jobs pass. It checks the tag against `pyproject.toml`, requires
-`docs/releases/TAG.md`, builds packages, and attaches the wheel/sdist to the release. Build/test jobs
+`docs/releases/TAG.md`, builds packages, assembles the complete product ZIP and SHA-256 manifest, and attaches
+the wheel, source archive, ZIP, mascot, and social artwork to the release. See
+[downloads and checksums](releasing.md). Build/test jobs
 have read-only repository permissions; only the final release job gets `contents: write`. It uses
 the repository-provided Actions token and never publishes to PyPI.
 

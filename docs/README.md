@@ -34,13 +34,14 @@ A stored claim, a supporting link, or intact file bytes do not establish scienti
 - [Pagination, concurrency, and benchmarks](scaling-and-concurrency.md)
 - [Troubleshooting](troubleshooting.md) and [FAQ](faq.md)
 - [Security policy](../SECURITY.md) and [security design](security.md)
+- [Release downloads, checksums, and publishing](releasing.md)
 - [Platforms and releases](platforms-and-releases.md), [changelog](../CHANGELOG.md), and [PyPI publication](pypi-publication.md)
 
 ## Contribute
 
 See [contribution guidelines](../CONTRIBUTING.md), [code of conduct](../CODE_OF_CONDUCT.md),
 [citation metadata](../CITATION.cff), and [Guará's mascot guide](mascot.md).
-See [repository branding and rename status](repository-name.md).
+See [English social artwork](media.md) and [repository branding and rename status](repository-name.md).
 
 Historical validation observations are in the [validation report](validation-report.md);
 run the development checks in the project README to assess your current checkout.
