@@ -27,7 +27,7 @@ jobs:
         run: python -m pytest --junitxml=test-results.xml
       - name: Windows metadata, CLI, MCP and portable backup suite
         if: runner.os == 'Windows'
-        run: python -m pytest tests/test_interfaces.py tests/test_portable.py tests/test_scaling_migration.py tests/test_usability.py tests/test_release_bundle.py --junitxml=test-results.xml
+        run: python -m pytest tests/test_interfaces.py tests/test_portable.py tests/test_scaling_migration.py tests/test_usability.py tests/test_release_bundle.py tests/test_cli_workflows.py --junitxml=test-results.xml
       - run: python -m examples.scenarios
       - run: python -m examples.tutorial
       - run: python -m build

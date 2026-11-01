@@ -45,7 +45,7 @@ Escolha uma pasta autorizada para seus dados. Os comandos abaixo criam o armazen
 ```sh
 opentruth init
 opentruth claim add "SYNTHETIC: beam Q is 1 m long." --subject "beam Q" --predicate length --value 1 --unit m
-opentruth --format text claim list
+opentruth --format text claim list --query "beam Q"
 opentruth export > evidence.json
 opentruth backup snapshot.zip
 ```
@@ -93,3 +93,11 @@ sem prometer certezas. Consulte o [guia do mascote](../mascot.md).
 
 DOI: [10.5281/zenodo.23870405](https://doi.org/10.5281/zenodo.23870405).
 Use os metadados de [CITATION.cff](../../CITATION.cff) e informe a versão utilizada.
+
+## Fluxos completos no terminal
+
+A versão 0.1.3 permite buscar com filtros, vincular evidências, revisar afirmações e reavaliar
+vínculos sem um objeto JSON completo. Use `claim list --query`, `--subject`, `--predicate`
+e `--review-status` para combinar filtros. Para corrigir, use `claim revise ID --statement`
+com `--reason` e `--actor`. Os exemplos completos estão no [início rápido](../quickstart.md).
+Uma correção preserva as versões anteriores e exige reavaliação explícita das evidências.

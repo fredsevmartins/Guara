@@ -54,7 +54,7 @@ from importlib.metadata import version
 def cli(*args):
     result = subprocess.run(
         [sys.executable, "-I", "-m", "opentruth.cli", "--workspace", "cli-data", *args],
-        capture_output=True, text=True, check=True,
+        capture_output=True, text=True, encoding="utf-8", check=True,
     )
     return result.stdout
 
@@ -65,12 +65,29 @@ Path("cli-data").mkdir()
 assert json.loads(cli("init"))["status"] == "INITIALIZED"
 claim = json.loads(cli("claim", "add", "SYNTHETIC installed CLI"))
 assert json.loads(cli("claim", "inspect", claim["id"]))["id"] == claim["id"]
+source = json.loads(cli("source", "add", "SYNTHETIC installed source"))
+link = json.loads(cli(
+    "evidence", "link", claim["id"], source["id"], "--relationship", "SUPPORTS",
+    "--location", "p1", "--excerpt", "SYNTHETIC", "--actor", "installer",
+))
+cli("review", claim["id"], "--decision", "INCONCLUSIVE", "--actor", "installer")
+cli(
+    "claim", "revise", claim["id"], "--statement", "SYNTHETIC revised installed CLI α — revisão",
+    "--reason", "SYNTHETIC correction", "--actor", "installer",
+)
+assert json.loads(cli("claim", "inspect", claim["id"]))["evidence_status"] == "INSUFFICIENT_EVIDENCE"
+cli(
+    "evidence", "revise", link["id"], "--relationship", "CONTRADICTS",
+    "--reason", "SYNTHETIC reassessment", "--actor", "installer",
+)
+assert len(json.loads(cli("claim", "list", "--query", "revised installed", "--exact-phrase"))) == 1
 assert len(json.loads(cli("export"))["claims"]) == 1
 cli("backup", "cli-backup.zip")
 cli("restore", "cli-backup.zip", "--data-dir", "restored")
 with OpenTruth("cli-data", "restored") as restored:
-    assert restored.inspect_claim(claim["id"])["original_statement"] == "SYNTHETIC installed CLI"
-print("Independent wheel API, CLI, version, backup and restore: PASS")
+    assert restored.inspect_claim(claim["id"])["original_statement"] == "SYNTHETIC revised installed CLI α — revisão"
+    assert restored.inspect_claim(claim["id"])["evidence_status"] == "CONTRADICTED_BY_REGISTERED_EVIDENCE"
+print("Independent wheel API, CLI lifecycle, version, backup and restore: PASS")
 """,
         ],
         check=True,
