@@ -86,3 +86,9 @@ Para Python, use `from opentruth import OpenTruth` e consulte a [API](docs/pytho
 Fontes registradas e bytes íntegros não estabelecem verdade científica. A ingestão segura de
 arquivos locais exige POSIX; no Windows, use os fluxos de metadados. Consulte as
 [limitações](docs/limitations.md) antes de adotar fluxos com dados reais.
+
+## Antes de usar com dados próprios
+
+Consulte o [guia de operação](docs/operations.md), a [interpretação dos estados](docs/statuses.md)
+e as [orientações de suporte](docs/support.md). Esses guias técnicos estão em inglês.
+Atualizações da documentação em `main` não substituem os arquivos da release já publicada.

@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Completed operations, support, glossary, status interpretation, troubleshooting, FAQ, and contributor documentation.
+- Corrected API export schema/version descriptions, pagination signatures, reassessment attribution, and thread/concurrency guidance.
+- Clarified published-versus-maintained documentation, upgrade/restore workflows, and supported data-retention boundaries.
+- Featured the published cartoon Guará artwork and its download/usage links in the README.
+
+
 ## 0.1.3 — 2026-11-02
 
 - Renamed the product and repository to Guara, retaining the `opentruth` Python/CLI/storage interfaces.

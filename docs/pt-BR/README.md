@@ -101,3 +101,13 @@ vínculos sem um objeto JSON completo. Use `claim list --query`, `--subject`, `-
 e `--review-status` para combinar filtros. Para corrigir, use `claim revise ID --statement`
 com `--reason` e `--actor`. Os exemplos completos estão no [início rápido](../quickstart.md).
 Uma correção preserva as versões anteriores e exige reavaliação explícita das evidências.
+
+## Operação, resultados e suporte
+
+Para usar com dados próprios, consulte o [guia de operação](../operations.md): localização dos
+dados, testes de restauração, atualização e retenção. A [tabela de estados](../statuses.md)
+separa revisão humana, relações de evidência, comparação numérica e integridade de arquivos.
+O [glossário](../glossary.md) define os termos. Para problemas, siga a
+[solução de problemas](../troubleshooting.md) e as [orientações de suporte](../support.md).
+Esses guias técnicos estão em inglês. A documentação em `main` recebe correções após o lançamento;
+os arquivos da release 0.1.3 mantêm a documentação da data de publicação.
