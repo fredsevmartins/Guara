@@ -1,5 +1,3 @@
-<img src="assets/logo.svg" width="96" alt="Guara logo">
-
 # Guara
 
 **Make AI Knowledge Verifiable.**
