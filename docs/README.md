@@ -1,6 +1,8 @@
 # Guara documentation
 
 Guara 0.1.3 records claims, sources, evidence links, and review history locally.
+This is the maintained documentation on `main`; see [version guidance](support.md) for
+released snapshots.
 A stored claim, a supporting link, or intact file bytes do not establish scientific truth.
 
 [Project overview](../README.md) · [Português brasileiro](pt-BR/README.md)
@@ -10,7 +12,8 @@ A stored claim, a supporting link, or intact file bytes do not establish scienti
 1. [Install](installation.md) Python and the package in a virtual environment.
 2. [Quickstart](quickstart.md): create a claim, attach evidence, inspect, and export.
 3. [Tutorial](tutorial.md): run the synthetic reassessment and backup/restore walkthrough.
-4. [Evidence model](evidence-model.md): interpret review and evidence statuses separately.
+4. [Status interpretation](statuses.md) and [glossary](glossary.md): distinguish review, evidence, and byte integrity.
+5. [Evidence model](evidence-model.md): interpret review and evidence statuses separately.
 
 ## Choose an interface
 
@@ -30,9 +33,10 @@ A stored claim, a supporting link, or intact file bytes do not establish scienti
 
 ## Operate and maintain
 
+- [Operations runbook: backups, recovery drills, upgrades, and retention](operations.md)
 - [Backups, restoration, and source integrity](backup-and-integrity.md)
 - [Pagination, concurrency, and benchmarks](scaling-and-concurrency.md)
-- [Troubleshooting](troubleshooting.md) and [FAQ](faq.md)
+- [Troubleshooting](troubleshooting.md), [FAQ](faq.md), and [support/reporting](support.md)
 - [Security policy](../SECURITY.md) and [security design](security.md)
 - [Release downloads, checksums, and publishing](releasing.md)
 - [Platforms and releases](platforms-and-releases.md), [changelog](../CHANGELOG.md), and [PyPI publication](pypi-publication.md)

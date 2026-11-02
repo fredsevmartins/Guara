@@ -50,12 +50,10 @@ Open the restored store using Python:
 
 ```python
 from opentruth import OpenTruth
-from opentruth.backup import restore_backup
 
-restore_backup(".", "snapshot.zip", data_dir="restored-evidence")
-app = OpenTruth(".", data_dir="restored-evidence")
-print(app.verify_sources())
-app.close()
+# The preceding CLI command already created restored-evidence.
+with OpenTruth(".", data_dir="restored-evidence") as app:
+    print(app.verify_sources())
 ```
 
 For restoration into the default `.opentruth`, use a **new workspace** with no initialized data

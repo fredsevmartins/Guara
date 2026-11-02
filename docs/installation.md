@@ -6,7 +6,13 @@ is claimed.
 ## Install a packaged release
 
 Download the wheel from [GitHub Releases](https://github.com/fredsevmartins/Guara/releases).
-Create and activate a virtual environment as described below, then install the downloaded file:
+Create a virtual environment in your chosen working directory:
+
+```sh
+python -m venv .venv
+```
+
+Activate it using the shell-specific command in the table below, then install the downloaded file:
 
 ```sh
 python -m pip install /path/to/opentruth-0.1.3-py3-none-any.whl

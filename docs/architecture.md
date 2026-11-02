@@ -8,6 +8,8 @@ Concern modules expose the same methods as unbound functions taking an engine fi
 State lives under `.opentruth/` in the configured workspace: `evidence.sqlite3` and `files/UUID`.
 Processes and runtime credentials are never stored as application state. Close Python API engines
 when finished. MCP stdio process exit closes its SQLite connection through OS cleanup.
-The single-user engine is synchronous; do not share one engine across threads.
+The single-user engine is synchronous. Its operation lock serializes method calls across threads;
+cooperating processes also serialize operations. Multi-call workflows are not atomic, and direct
+connection/file access is outside the public API guarantees. See [concurrency](scaling-and-concurrency.md).
 
 See [system architecture](workflows/system-architecture.md).

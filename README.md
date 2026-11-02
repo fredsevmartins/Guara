@@ -4,6 +4,10 @@
 
 **Make AI Knowledge Verifiable.**
 
+[![Quality checks](https://github.com/fredsevmartins/Guara/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/fredsevmartins/Guara/actions/workflows/ci.yml)
+
+<a href="docs/media.md"><img src="assets/social/guara-linkedin-cartoon-en.png" width="420" alt="Guara product overview with its cartoon maned wolf scientist mascot: record claims and sources, connect evidence, and review history. Explore the project on GitHub."></a>
+
 Formerly OpenTruth. The Python package, CLI command, and `.opentruth/` storage name remain
 `opentruth` for compatibility. The project and repository are now named **Guara**.
 See [compatibility details](docs/repository-name.md).
@@ -19,6 +23,18 @@ without an LLM, cloud account, or external database.
 
 A stored assertion is not necessarily true. A registered source is not necessarily reliable.
 A citation is not proof. Guara manages evidence; it does not determine scientific truth.
+
+## Who it is for
+
+| Use case | What Guara records |
+| --- | --- |
+| Research/engineering notes | Statements, measurement context, source references, and numeric comparisons |
+| AI-assisted research review | Exact assertions, declared provenance, and explicit evidence relationships |
+| Auditable local workflows | Corrections, reassessments, review reasons, and recoverable backups |
+
+The project provides a terminal interface, Python API, and local MCP server. It does not include
+a hosted service or browser dashboard. See [limitations](docs/limitations.md) before adopting it
+for collaborative or sensitive workflows.
 
 ## Why evidence memory matters
 
@@ -104,8 +120,8 @@ app.close()
 CLI equivalent for creating and listing claims:
 
 ```sh
-opentruth claim add --json '{"original_statement":"SYNTHETIC: Alloy Q withstands 10 cycles."}'
-opentruth claim list --json '{"query":"Alloy"}'
+opentruth claim add "SYNTHETIC: Alloy Q withstands 10 cycles."
+opentruth claim list --query Alloy
 opentruth export > evidence.json
 ```
 
@@ -204,6 +220,15 @@ local embeddings, evidence visualization, source versions, and batch exchange; v
 JSON-LD/PROV interoperability and scientific repository integration; v0.5 collaborative
 reviews and access control; v1.0 stable evidence exchange and extensible validation.
 All future AI assistance remains optional and distinguished from deterministic/human checks.
+
+## Support and operating guidance
+
+Use the [troubleshooting guide](docs/troubleshooting.md) for errors and the
+[operations runbook](docs/operations.md) for backup drills, upgrades, and workspace handling.
+[Status interpretation](docs/statuses.md) explains review, evidence, comparison, and integrity
+fields; the [glossary](docs/glossary.md) defines the terminology. See [support](docs/support.md)
+for reporting and version guidance. The documentation on `main` includes corrections made after
+a release; tagged documentation and release downloads remain immutable snapshots.
 
 ## Contributing
 
