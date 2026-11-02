@@ -82,11 +82,11 @@ Os guias técnicos abaixo estão em inglês:
 
 ## Guará, nosso mascote
 
-<img src="../../assets/mascot-guara.png" width="280" alt="Guará, um lobo-guará, examina um caderno de evidências com uma lupa.">
+<img src="../../assets/mascot-guara.png" width="280" alt="Guará, um lobo-guará apoiado nas quatro patas, com óculos e lenço turquesa.">
 
 Guará é um lobo-guará inspirado na fauna brasileira. As pernas longas, a pelagem alaranjada,
-a crina escura e as orelhas grandes preservam a identidade do animal. O caderno representa a memória de evidências;
-a lupa, o cuidado de investigar antes de concluir. Ele representa curiosidade e rastreabilidade,
+a crina escura e as orelhas grandes preservam a identidade do animal. Agora ele está apoiado nas
+quatro patas, com óculos e lenço turquesa, representando curiosidade e evidências conectadas,
 sem prometer certezas. Consulte o [guia do mascote](../mascot.md).
 
 ## Como citar

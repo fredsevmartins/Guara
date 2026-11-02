@@ -4,7 +4,7 @@
 
 [![Quality checks](https://github.com/fredsevmartins/Guara/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/fredsevmartins/Guara/actions/workflows/ci.yml)
 
-<a href="docs/media.md"><img src="assets/social/guara-linkedin-cartoon-en.png" width="420" alt="Guara product overview with its cartoon maned wolf scientist mascot: record claims and sources, connect evidence, and review history. Explore the project on GitHub."></a>
+<a href="docs/mascot.md"><img src="assets/mascot-guara.png" width="480" alt="Guará, a Brazilian maned wolf standing on four paws, with teal goggles and a teal neckerchief."></a>
 
 Formerly OpenTruth. The Python package, CLI command, and `.opentruth/` storage name remain
 `opentruth` for compatibility. The project and repository are now named **Guara**.
@@ -205,10 +205,10 @@ PyPI publication is optional maintainer configuration and has not been confirmed
 
 ## Meet Guará
 
-<img src="assets/mascot-guara.png" width="280" alt="Guará, a Brazilian maned wolf, examines an evidence notebook with a magnifying glass.">
+<img src="assets/mascot-guara.png" width="280" alt="Guará, a Brazilian maned wolf standing on four paws, with teal goggles and a teal neckerchief.">
 
-Guará is our maned wolf mascot, inspired by Brazil's fauna. His notebook and magnifying glass
-represent curiosity, traceability, and careful examination. He invites you to inspect evidence;
+Guará is our maned wolf mascot, inspired by Brazil's fauna. He stands on four paws, wearing
+teal goggles and a neckerchief that represent curiosity and connected evidence. He invites you to inspect evidence;
 he does not certify that a claim is true. See the [mascot guide](docs/mascot.md) and [English LinkedIn artwork](docs/media.md).
 
 ## Roadmap

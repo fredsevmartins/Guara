@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Updated the canonical Guará mascot and README header to the four-paw version with teal goggles and neckerchief.
+
 - Completed operations, support, glossary, status interpretation, troubleshooting, FAQ, and contributor documentation.
 - Corrected API export schema/version descriptions, pagination signatures, reassessment attribution, and thread/concurrency guidance.
 - Clarified published-versus-maintained documentation, upgrade/restore workflows, and supported data-retention boundaries.
